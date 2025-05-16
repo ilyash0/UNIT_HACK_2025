@@ -1,0 +1,20 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}ЛЯГУШКИИИ!{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css">
+    <link rel="icon" href="{% static 'img/icon.png' %}">
+</head>
+<body>
+
+<header>
+</header>
+
+{% block content %}{% endblock %}
+
+<footer>
+</footer>
+</body>
+</html>
