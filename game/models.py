@@ -3,7 +3,6 @@ from django.db import models
 
 
 class Game(models.Model):
-    name = models.CharField(max_length=100)
     code = models.CharField(max_length=5)
     created_at = models.DateTimeField(auto_now_add=True)
     # host_user = models.ForeignKey(User, on_delete=models.CASCADE)
