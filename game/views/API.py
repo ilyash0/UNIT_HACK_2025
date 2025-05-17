@@ -84,6 +84,31 @@ class PlayerAnswerAPIView(View):
 
         return HttpResponse(status=204)
 
+    def get(self, request, *args, **kwargs):
+        """
+           В ответ отправляет JSON: [
+                {
+                    "user_id": int,    # идентификатор пользователя
+                    "answer": str      # ответ
+                },
+                {
+                    "user_id": int,    # идентификатор пользователя
+                    "answer": str      # ответ
+                }
+           ]
+        """
+        prompt_index = cache.get("prompt_index")
+
+        matches = []
+        players = Player.objects.order_by('prompt')[prompt_index - 1:2 * prompt_index]
+        for p in players:
+            matches.append({
+                'user_id': p.id,
+                'answer': p.answer
+            })
+
+        return JsonResponse(matches, status=204)
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class VoteAPIView(View):
