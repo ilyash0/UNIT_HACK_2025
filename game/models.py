@@ -27,7 +27,7 @@ class Player(models.Model):
     joined_at = models.DateTimeField(auto_now_add=True)
     prompt = models.ForeignKey(Prompt, on_delete=models.CASCADE, null=True)
     answer = models.TextField(null=True, blank=True)
-    vote_telegram_id = models.BigIntegerField(null=True)
+    vote_count = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         return self.username

@@ -2,6 +2,7 @@ from json import loads
 from time import time, sleep
 
 from django.core.cache import cache
+from django.db import transaction, IntegrityError
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -30,9 +31,16 @@ class PlayerConnectAPIView(View):
         except (ValueError, KeyError):
             return HttpResponseBadRequest('Invalid data')
 
-        player, created = Player.objects.get_or_create(
-            telegram_id=tg_id, username=username
-        )
+        try:
+            with transaction.atomic():
+                player, created = Player.objects.get_or_create(
+                    telegram_id=tg_id,
+                    defaults={'username': username, 'prompt': None, 'answer': None, 'vote_telegram_id': None},
+                )
+        except IntegrityError:
+            player = Player.objects.get(telegram_id=tg_id)
+            created = False
+
         if not created:
             player.username = username
             player.joined_at = timezone.now()
@@ -125,8 +133,8 @@ class VoteAPIView(View):
         except (ValueError, KeyError, TypeError):
             return HttpResponseBadRequest('Invalid JSON payload')
 
-        player = Player.objects.get(telegram_id=voter_id)
-        player.vote_telegram_id = candidate_id
+        player = Player.objects.get(telegram_id=candidate_id)
+        player.vote_count += 1
         player.save()
 
         return HttpResponse(status=204)
