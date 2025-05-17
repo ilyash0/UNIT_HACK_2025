@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Игра{% endblock %}
+
+{% block content %}
+    <h2>Лобби игры {{ game.code }}</h2>
+
+    <ul>
+        {% for p in players %}
+            <li>
+                {{ p.nickname }} —
+                {% if p.ready %}
+                    <strong>Готов</strong>
+                {% else %}
+                    Не готов
+                {% endif %}
+                {% if me and p == me %}
+                    <form action="{% url 'game:toggle_ready' code=game.code %}" method="post" style="display:inline">
+                        {% csrf_token %}
+                        <button type="submit">
+                            {% if me.ready %}Снять готов{% else %}Я готов{% endif %}
+                        </button>
+                    </form>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+
+    {% if game.started %}
+        <p><strong>Игра началась!</strong></p>
+        <!-- Тут можно сделать редирект на игровой экран -->
+    {% else %}
+        <p>Ждём, пока все игроки нажмут «Я готов»…</p>
+    {% endif %}
+{% endblock %}

@@ -2,9 +2,30 @@ from django.db import models
 
 
 class Game(models.Model):
-    code = models.CharField(max_length=5)
+    code = models.CharField(max_length=5, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    # host_user = models.ForeignKey(User, on_delete=models.CASCADE)
+    started = models.BooleanField(default=False)
+
+    def all_ready(self):
+        players = self.players.all()
+        return players.exists() and all(p.ready for p in players)
+
+    def __str__(self):
+        return f"{self.code} ({'Started' if self.started else 'Waiting'})"
+
+
+class Player(models.Model):
+    game = models.ForeignKey(Game, related_name='players', on_delete=models.CASCADE)
+    nickname = models.CharField(max_length=50)
+    joined_at = models.DateTimeField(auto_now_add=True)
+    ready = models.BooleanField(default=False)
+    is_host = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('game', 'nickname')
+
+    def __str__(self):
+        return f"{self.nickname} ({'Ready' if self.ready else 'Not ready'})"
 
 
 class Prompt(models.Model):

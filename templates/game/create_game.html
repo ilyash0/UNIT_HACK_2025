@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Игра{% endblock %}
+
+{% block content %}
+    <form method="post">
+        {% csrf_token %}
+        <label>Ваш никнейм:
+            <input type="text" name="nickname" value="{{ nickname }}" required>
+        </label><br>
+        <button type="submit">Создать игру</button>
+    </form>
+{% endblock %}

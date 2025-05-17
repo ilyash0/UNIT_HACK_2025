@@ -16,8 +16,14 @@ Including another URLconf
 """
 from django.urls import path
 
-from game.views import MainMenuView
+from game.views import MainMenuView, CreateGameView, JoinGameView, LobbyView, ToggleReadyView
+
+app_name = 'game'
 
 urlpatterns = [
-    path('game/', MainMenuView.as_view(), name='game'),
+    path('game/', MainMenuView.as_view(), name='main_menu'),
+    path('create/', CreateGameView.as_view(), name='create_game'),
+    path('join/', JoinGameView.as_view(), name='join_game'),
+    path('lobby/<str:code>/', LobbyView.as_view(), name='lobby'),
+    path('lobby/<str:code>/ready/', ToggleReadyView.as_view(), name='toggle_ready'),
 ]
