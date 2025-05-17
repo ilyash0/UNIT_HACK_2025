@@ -16,15 +16,15 @@ Including another URLconf
 """
 from django.urls import path, re_path
 
-# from .consumers import PlayerConsumer
-# from .views.API import PlayerConnectAPIView
+from .consumers import PlayerConsumer
+from .views.API import PlayerConnectAPIView
 from .views.pages import HomePageView
 
 urlpatterns = [
     path('', HomePageView.as_view(), name='home'),
-    # path('api/connect/', PlayerConnectAPIView.as_view(), name='connect_user'),
+    path('api/connect/', PlayerConnectAPIView.as_view(), name='connect_user'),
 ]
 
-# websocket_urlpatterns = [
-#     re_path(r'ws/players/$', PlayerConsumer.as_asgi()),
-# ]
+websocket_urlpatterns = [
+    re_path(r'ws/players/$', PlayerConsumer.as_asgi()),
+]
