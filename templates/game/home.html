@@ -11,27 +11,27 @@
         {% endfor %}
     </ul>
 
-    <script>
-        const list = document.getElementById('players');
-        const socket = new WebSocket(
-            'ws://' + window.location.host + '/ws/players/'
-        );
-
-        socket.onmessage = function (e) {
-            const data = JSON.parse(e.data);
-            if (data.type === 'new_player') {
-                const li = document.createElement('li');
-                li.textContent = data.player.username;
-                li.dataset.id = data.player.id;
-                list.append(li);
-            } else if (data.type === 'init') {
-                list.innerHTML = '';
-                data.players.forEach(p => {
-                    const li = document.createElement('li');
-                    li.textContent = p.username;
-                    list.append(li);
-                });
-            }
-        };
-    </script>
+{#    <script>#}
+{#        const list = document.getElementById('players');#}
+{#        const socket = new WebSocket(#}
+{#            'ws://' + window.location.host + '/ws/players/'#}
+{#        );#}
+{##}
+{#        socket.onmessage = function (e) {#}
+{#            const data = JSON.parse(e.data);#}
+{#            if (data.type === 'new_player') {#}
+{#                const li = document.createElement('li');#}
+{#                li.textContent = data.player.username;#}
+{#                li.dataset.id = data.player.id;#}
+{#                list.append(li);#}
+{#            } else if (data.type === 'init') {#}
+{#                list.innerHTML = '';#}
+{#                data.players.forEach(p => {#}
+{#                    const li = document.createElement('li');#}
+{#                    li.textContent = p.username;#}
+{#                    list.append(li);#}
+{#                });#}
+{#            }#}
+{#        };#}
+{#    </script>#}
 {% endblock %}
