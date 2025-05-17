@@ -14,10 +14,18 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import path
+from django.urls import path, re_path
+
+from .consumers import PlayerConsumer
+from .views import HomePageView, PlayerConnectAPIView
 
 app_name = 'game'
 
 urlpatterns = [
+    path('', HomePageView.as_view(), name='home'),
+    path('api/connect/', PlayerConnectAPIView.as_view(), name='connect_user'),
+]
 
+websocket_urlpatterns = [
+    re_path(r'ws/players/$', PlayerConsumer.as_asgi()),
 ]
