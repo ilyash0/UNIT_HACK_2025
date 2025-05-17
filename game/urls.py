@@ -19,12 +19,14 @@ from django.urls import path, re_path
 from .consumers import PlayerConsumer
 from .views.API import PlayerConnectAPIView
 from .views.pages import HomePageView
+from .views.pages import WaitingPageView
 
 app_name = 'game'
 
 urlpatterns = [
     path('', HomePageView.as_view(), name='main_menu'),
     path('api/connect/', PlayerConnectAPIView.as_view(), name='connect_user'),
+    path('waiting/', WaitingPageView.as_view(), name='waiting'),
 ]
 
 websocket_urlpatterns = [

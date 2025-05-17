@@ -8,7 +8,7 @@ def get_players():
 
 class HomePageView(TemplateView):
     """
-    Отображает главную страницу с визуалом и списком всех присоединившихся игроков.
+    Отображает главную страницу визуалом и списком всех присоединившихся игроков.
     """
     template_name = 'game/home.html'
 
@@ -43,3 +43,4 @@ class WinPageView(TemplateView):
         context = super().get_context_data(**kwargs)
         context['players'] = get_players()
         return context
+
