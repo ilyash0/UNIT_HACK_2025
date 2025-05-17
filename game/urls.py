@@ -23,7 +23,7 @@ from .views.pages import HomePageView
 app_name = 'game'
 
 urlpatterns = [
-    path('', HomePageView.as_view(), name='game'),
+    path('', HomePageView.as_view(), name='main_menu'),
     path('api/connect/', PlayerConnectAPIView.as_view(), name='connect_user'),
 ]
 

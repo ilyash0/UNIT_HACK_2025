@@ -22,5 +22,5 @@ from UNIT_HACK_2025.views import HomeView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', HomeView.as_view(), name='home'),
-    path('', include('game.urls')),
+    path('game/', include('game.urls')),
 ]
