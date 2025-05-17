@@ -1,5 +1,6 @@
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
+from game.models import Player
 
 
 class PlayerConsumer(AsyncJsonWebsocketConsumer):
@@ -7,7 +8,6 @@ class PlayerConsumer(AsyncJsonWebsocketConsumer):
         await self.channel_layer.group_add('players', self.channel_name)
         await self.accept()
 
-        from .models import Player
         players = await database_sync_to_async(list)(
             Player.objects.order_by('joined_at').values('id', 'username'))
         await self.send_json({'type': 'init', 'players': players})
