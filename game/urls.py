@@ -20,8 +20,6 @@ from django.urls import path, re_path
 # from .views.API import PlayerConnectAPIView
 from .views.pages import HomePageView
 
-app_name = 'game'
-
 urlpatterns = [
     path('', HomePageView.as_view(), name='home'),
     # path('api/connect/', PlayerConnectAPIView.as_view(), name='connect_user'),
