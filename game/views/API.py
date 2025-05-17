@@ -37,7 +37,7 @@ class PlayerConnectAPIView(View):
             player.joined_at = timezone.now()
             player.save()
 
-        return HttpResponse("OK")
+        return HttpResponse(status=204)
 
     @csrf_exempt
     def get(self, request, *args, **kwargs):
@@ -62,7 +62,7 @@ class PlayerAnswerAPIView(View):
         "question_id": int,   # необязательное поле — идентификатор/текст вопроса
         "answer": "<str>"
     }
-    В ответ всегда отправляет "OK" или 400 при ошибке.
+    В ответ всегда отправляет 202 или 400 при ошибке.
     """
 
     CACHE_TIMEOUT = 5 * 60
@@ -81,7 +81,7 @@ class PlayerAnswerAPIView(View):
 
         cache.set(cache_key, answer, timeout=self.CACHE_TIMEOUT)
 
-        return HttpResponse("OK")
+        return HttpResponse(status=204)
 
 
 class VoteAPIView(View):
@@ -115,4 +115,4 @@ class VoteAPIView(View):
         current = cache.get(candidate_key, 0)
         cache.set(candidate_key, current + 1, timeout=self.CACHE_TIMEOUT)
 
-        return HttpResponse("OK")
+        return HttpResponse(status=204)
