@@ -1,69 +1,8 @@
-from random import choices
-from string import ascii_uppercase, digits
-
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404
 from django.views import View
-from django.http import HttpResponseBadRequest
 from django.views.generic import TemplateView
 
 from game.models import Game, Player
-
-
-def generate_game_code(length=5):
-    return ''.join(choices(ascii_uppercase + digits, k=length))
-
-
-class MainMenuView(TemplateView):
-    template_name = "game/main_menu.html"
-
-
-class CreateGameView(View):
-    template_name = "game/create_game.html"
-
-    def get(self, request):
-        return render(request, self.template_name)
-
-    def post(self, request):
-        nickname = request.POST.get('nickname', '').strip()
-        if not nickname:
-            return HttpResponseBadRequest("Необходимо указать ваш никнейм")
-
-        code = generate_game_code()
-        while Game.objects.filter(code=code).exists():
-            code = generate_game_code()
-
-        game = Game.objects.create(code=code)
-        Player.objects.create(game=game, nickname=nickname, is_host=True)
-
-        response = redirect('game:lobby', code=game.code)
-        response.set_cookie('nickname', nickname, max_age=7 * 24 * 3600)
-        response.set_cookie('game_code', game.code, max_age=7 * 24 * 3600)
-        return response
-
-
-class JoinGameView(View):
-    template_name = "game/join_game.html"
-
-    def get(self, request):
-        return render(request, self.template_name)
-
-    def post(self, request):
-        code = request.POST.get('code', '').strip().upper()
-        nickname = request.POST.get('nickname', '').strip()
-        if not code or not nickname:
-            return HttpResponseBadRequest("Необходимо указать код игры и ваш никнейм")
-
-        game = get_object_or_404(Game, code=code)
-        player_exists = Player.objects.filter(game=game, nickname=nickname).exists()
-        if game.started and not player_exists:
-            return HttpResponseBadRequest("Игра уже началась")
-
-        Player.objects.get_or_create(game=game, nickname=nickname)
-
-        response = redirect('game:lobby', code=game.code)
-        response.set_cookie('nickname', nickname, max_age=7 * 24 * 3600)
-        response.set_cookie('game_code', game.code, max_age=7 * 24 * 3600)
-        return response
 
 
 class LobbyView(TemplateView):
