@@ -11,7 +11,11 @@ from ..models import Player
 class PlayerConnectAPIView(View):
     """
     API для подключения (регистрации) игрока.
-    Ожидает POST-запрос с данными JSON: { 'telegram_id': int, 'username': str }
+    Ожидает POST-запрос с данными JSON: { '
+        telegram_id': int,
+        'username': str
+    }
+    В ответ всегда отправляет "OK" или 400 при ошибке.
     """
 
     def post(self, request, *args, **kwargs):
@@ -51,13 +55,14 @@ class PlayerAnswerAPIView(View):
     """
     API для приёма ответов пользователей и их кэширования.
     Ожидает POST с JSON: {
-        "telegram_id": <int>,
-        "question_id": "<int>",   # необязательное поле — идентификатор/текст вопроса
+        "telegram_id": int>
+        "question_id": int,   # необязательное поле — идентификатор/текст вопроса
         "answer": "<str>"
     }
+    В ответ всегда отправляет "OK" или 400 при ошибке.
     """
 
-    CACHE_TIMEOUT = 60 * 60
+    CACHE_TIMEOUT = 5 * 60
 
     def post(self, request, *args, **kwargs):
         try:
@@ -71,5 +76,38 @@ class PlayerAnswerAPIView(View):
         cache_key = f"user_{user_id}_answer_{question_id}"
 
         cache.set(cache_key, answer, timeout=self.CACHE_TIMEOUT)
+
+        return HttpResponse("OK")
+
+
+class VoteAPIView(View):
+    """
+    API для голосования за лучший ответ.
+    Ожидает POST с JSON: {
+        "voter_id": int,         # идентификатор голосующего
+        "candidate_id": int      # идентификатор того, за кого голосуют
+    }
+    В ответ всегда отправляет "OK" или 400 при ошибке.
+    """
+
+    CACHE_TIMEOUT = 60
+
+    def post(self, request, *args, **kwargs):
+        try:
+            data = request.json if hasattr(request, 'json') else loads(request.body)
+            voter_id = int(data['voter_id'])
+            candidate_id = int(data['candidate_id'])
+        except (ValueError, KeyError, TypeError):
+            return HttpResponseBadRequest('Invalid JSON payload')
+
+        voter_key = f"vote_voter_{voter_id}"
+        if cache.get(voter_key) is not None:
+            return HttpResponseBadRequest('User has already voted')
+
+        cache.set(voter_key, candidate_id, timeout=self.CACHE_TIMEOUT)
+
+        candidate_key = f"vote_count_{candidate_id}"
+        current = cache.get(candidate_key, 0)
+        cache.set(candidate_key, current + 1, timeout=self.CACHE_TIMEOUT)
 
         return HttpResponse("OK")
