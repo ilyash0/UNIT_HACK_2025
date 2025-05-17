@@ -147,4 +147,4 @@ class PromptAPIView(View):
 
             sleep(self.interval)
 
-        return JsonResponse(status=408)
+        return HttpResponse(status=408)
