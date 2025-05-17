@@ -9,4 +9,9 @@
         <canvas id="matrix"></canvas>
     </div>
     <script src="{% static 'js/matrix.js' %}"></script>
+    <div class="button-group">
+  <!-- Вместо старой ссылки -->
+  <a href="{% url 'game:vote' %}" class="button">Перейти к голосованию</a>
+</div>
+
 {% endblock %}

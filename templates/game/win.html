@@ -1,8 +1,24 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Игра{% endblock %}
+{% block title %}Победа{% endblock %}
 
 {% block content %}
-    <h1>Победа</h1>
+  <h1 style="text-align: center; margin-bottom: 40px;">
+    Победил — {{ results.0.username }}
+  </h1>
+
+  <div class="results-list">
+    {% for r in results %}
+      <div class="result-item {% if r.is_winner %}winner{% endif %}">
+        <div class="bar" style="width: {{ r.percentage }}%;">
+          <span>{{ r.username }} – {{ r.score }} {{ r.score|pluralize:"очко,очка,очков" }}</span>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="button-group" style="text-align: center; margin-top: 40px;">
+    <a href="{% url 'game:vote' %}" class="button">Назад к голосованию</a>
+  </div>
 {% endblock %}
