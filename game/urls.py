@@ -20,8 +20,10 @@ from .consumers import PlayerConsumer
 from .views.API import PlayerConnectAPIView
 from .views.pages import HomePageView
 
+app_name = 'game'
+
 urlpatterns = [
-    path('', HomePageView.as_view(), name='home'),
+    path('', HomePageView.as_view(), name='game'),
     path('api/connect/', PlayerConnectAPIView.as_view(), name='connect_user'),
 ]
 
