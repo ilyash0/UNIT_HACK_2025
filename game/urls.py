@@ -17,7 +17,7 @@ Including another URLconf
 from django.urls import path, re_path
 
 from .consumers import PlayerConsumer
-from .views.API import PlayerConnectAPIView, PlayerAnswerAPIView, VoteAPIView, PromptAPIView
+from .views.API import PlayerConnectAPIView, PlayerAnswerAPIView, VoteAPIView, PromptAPIView, PlayerCountAPIView
 from .views.pages import HomePageView
 
 app_name = 'game'
@@ -28,6 +28,7 @@ urlpatterns = [
     path('api/answer/', PlayerAnswerAPIView.as_view()),
     path('api/vote/', VoteAPIView.as_view()),
     path('api/prompt/', PromptAPIView.as_view()),
+    path('api/count/', PlayerCountAPIView.as_view()),
 ]
 
 websocket_urlpatterns = [

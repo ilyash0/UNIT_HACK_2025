@@ -48,18 +48,6 @@ class PlayerConnectAPIView(View):
 
         return HttpResponse(status=204)
 
-    def get(self, request, *args, **kwargs):
-        players = Player.objects.order_by('joined_at')
-        data = [
-            {
-                'id': p.id,
-                'telegram_id': p.telegram_id,
-                'username': p.username,
-            }
-            for p in players
-        ]
-        return JsonResponse({'players': data})
-
 
 @method_decorator(csrf_exempt, name='dispatch')
 class PlayerAnswerAPIView(View):
@@ -176,3 +164,12 @@ class PromptAPIView(View):
             sleep(self.interval)
 
         return HttpResponse(status=408)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class PlayerCountAPIView(View):
+    def get(self, request, *args, **kwargs):
+        players_count = Player.objects.count()
+        if players_count % 2 == 1:
+            players_count += 1
+        return JsonResponse(players_count)
