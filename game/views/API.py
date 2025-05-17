@@ -1,6 +1,7 @@
 from json import loads
 
-from django.http import JsonResponse, HttpResponseBadRequest
+from django.core.cache import cache
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
 from django.utils import timezone
 from django.views import View
 
@@ -30,13 +31,7 @@ class PlayerConnectAPIView(View):
             player.joined_at = timezone.now()
             player.save()
 
-        return JsonResponse({
-            'id': player.id,
-            'telegram_id': player.telegram_id,
-            'username': player.username,
-            'joined_at': player.joined_at.isoformat(),
-            'created': created,
-        })
+        return HttpResponse("OK")
 
     def get(self, request, *args, **kwargs):
         players = Player.objects.order_by('joined_at')
@@ -50,3 +45,31 @@ class PlayerConnectAPIView(View):
             for p in players
         ]
         return JsonResponse({'players': data})
+
+
+class PlayerAnswerAPIView(View):
+    """
+    API для приёма ответов пользователей и их кэширования.
+    Ожидает POST с JSON: {
+        "telegram_id": <int>,
+        "question_id": "<int>",   # необязательное поле — идентификатор/текст вопроса
+        "answer": "<str>"
+    }
+    """
+
+    CACHE_TIMEOUT = 60 * 60
+
+    def post(self, request, *args, **kwargs):
+        try:
+            data = request.json if hasattr(request, 'json') else loads(request.body)
+            user_id = data['user_id']
+            answer = data['answer']
+            question_id = data.get('question_id', '1')
+        except (ValueError, KeyError):
+            return HttpResponseBadRequest('Invalid JSON payload')
+
+        cache_key = f"user_{user_id}_answer_{question_id}"
+
+        cache.set(cache_key, answer, timeout=self.CACHE_TIMEOUT)
+
+        return HttpResponse("OK")
