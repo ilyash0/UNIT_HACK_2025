@@ -35,7 +35,7 @@ class PlayerConnectAPIView(View):
             with transaction.atomic():
                 player, created = Player.objects.get_or_create(
                     telegram_id=tg_id,
-                    defaults={'username': username, 'prompt': None, 'answer': None, 'vote_telegram_id': None},
+                    defaults={'username': username, 'prompt': None, 'answer': None, 'vote_count': None},
                 )
         except IntegrityError:
             player = Player.objects.get(telegram_id=tg_id)
