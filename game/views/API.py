@@ -1,4 +1,5 @@
 from json import loads
+from time import time, sleep
 
 from django.core.cache import cache
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
@@ -116,3 +117,34 @@ class VoteAPIView(View):
         cache.set(candidate_key, current + 1, timeout=self.CACHE_TIMEOUT)
 
         return HttpResponse(status=204)
+
+
+class PromptAPIView(View):
+    """
+    GET /api/get_prompt/?user_id=<ID>
+    На вход принимает user_id: int
+    В ответ отправляет JSON: {
+        "user_id": int,         # идентификатор пользователя
+        "prompt": str      # фраза
+    }
+    """
+    timeout = 10 * 60
+    interval = 5
+
+    def get(self, request, *args, **kwargs):
+        user_id = request.GET.get('user_id')
+        start_time = time()
+        question_id = 0
+        prompt_key = f"user_{user_id}_answer_{question_id}"
+
+        while time() - start_time < self.timeout:
+            prompt = cache.get(prompt_key)
+            if prompt is not None:
+                return JsonResponse({
+                    'user_id': user_id,
+                    'prompt': prompt
+                })
+
+            sleep(self.interval)
+
+        return JsonResponse(status=408)
