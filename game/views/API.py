@@ -89,28 +89,37 @@ class PlayerAnswerAPIView(View):
 
     def get(self, request, *args, **kwargs):
         """
-           В ответ отправляет JSON: [
-                {
-                    "telegram_id": int,    # идентификатор пользователя
-                    "answer": str      # ответ
-                },
-                {
-                    "telegram_id": int,    # идентификатор пользователя
-                    "answer": str      # ответ
-                }
-           ]
+           В ответ отправляет JSON: {
+                "prompt": str,
+                "answer0":
+                    {
+                        "telegram_id": int,    # идентификатор пользователя
+                        "answer": str          # ответ
+                    },
+                "answer1":
+                    {
+                        "telegram_id": int,    # идентификатор пользователя
+                        "answer": str          # ответ
+                    }
+           }
         """
         prompt_index = cache.get("prompt_index")
 
-        matches = []
         players = Player.objects.order_by('prompt')[prompt_index - 1:2 * prompt_index]
-        for p in players:
-            matches.append({
-                'telegram_id': p.telegram_id,
-                'answer': p.answer
-            })
 
-        return JsonResponse(matches, status=204)
+        result = {
+            "prompt": players.first().prompt,
+            "answer0": {
+                "telegram_id": players[0].telegram_id,
+                "answer": players[0].answer
+            },
+            "answer1": {
+                "telegram_id": players[1].telegram_id,
+                "answer": players[1].answer
+            },
+        }
+
+        return JsonResponse(result, status=204)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
