@@ -151,6 +151,7 @@ class VoteAPIView(View):
         return HttpResponse(status=204)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class PromptAPIView(View):
     timeout = 10 * 60
     interval = 5
