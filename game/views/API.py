@@ -170,7 +170,7 @@ class PromptAPIView(View):
             if player.prompt is not None:
                 return JsonResponse({
                     'telegram_id': telegram_id,
-                    'prompt': player.prompt
+                    'prompt': player.prompt.phrase
                 })
 
             sleep(self.interval)
