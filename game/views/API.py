@@ -88,11 +88,11 @@ class PlayerAnswerAPIView(View):
         """
            В ответ отправляет JSON: [
                 {
-                    "user_id": int,    # идентификатор пользователя
+                    "telegram_id": int,    # идентификатор пользователя
                     "answer": str      # ответ
                 },
                 {
-                    "user_id": int,    # идентификатор пользователя
+                    "telegram_id": int,    # идентификатор пользователя
                     "answer": str      # ответ
                 }
            ]
@@ -103,7 +103,7 @@ class PlayerAnswerAPIView(View):
         players = Player.objects.order_by('prompt')[prompt_index - 1:2 * prompt_index]
         for p in players:
             matches.append({
-                'user_id': p.id,
+                'telegram_id': p.telegram_id,
                 'answer': p.answer
             })
 
