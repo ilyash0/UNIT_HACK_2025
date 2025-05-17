@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Игра{% endblock %}
+
+{% block content %}
+    <h1>Игроки</h1>
+    <ul id="players">
+        {% for p in players %}
+            <li data-id="{{ p.id }}">{{ p.username }}</li>
+        {% endfor %}
+    </ul>
+
+    <script>
+        const list = document.getElementById('players');
+        const socket = new WebSocket(
+            'ws://' + window.location.host + '/ws/players/'
+        );
+
+        socket.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            if (data.type === 'new_player') {
+                const li = document.createElement('li');
+                li.textContent = data.player.username;
+                li.dataset.id = data.player.id;
+                list.append(li);
+            } else if (data.type === 'init') {
+                list.innerHTML = '';
+                data.players.forEach(p => {
+                    const li = document.createElement('li');
+                    li.textContent = p.username;
+                    list.append(li);
+                });
+            }
+        };
+    </script>
+{% endblock %}
