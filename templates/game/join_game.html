@@ -1,16 +1,15 @@
 {% extends 'base.html' %}
-{% load static %}
-{% block title %}Игра{% endblock %}
+{% block title %}Присоединиться к игре{% endblock %}
 
 {% block content %}
+<div class="container">
+    <h1>Присоединиться к игре</h1>
     <form method="post">
         {% csrf_token %}
-        <label>Код игры:
-            <input type="text" name="code" maxlength="5" required>
-        </label><br>
-        <label>Ваш никнейм:
-            <input type="text" name="nickname" value="{{ nickname }}" required>
-        </label><br>
+        <p>Ваш никнейм: {{ request.COOKIES.nickname }}</p>
+        <label for="code">Код игры:</label>
+        <input type="text" name="code" id="code" required>
         <button type="submit">Присоединиться</button>
     </form>
+</div>
 {% endblock %}

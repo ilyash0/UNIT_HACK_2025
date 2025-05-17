@@ -1,35 +1,56 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Игра{% endblock %}
+{% block title %}Лобби игры{% endblock %}
 
 {% block content %}
-    <h2>Лобби игры {{ game.code }}</h2>
+<div class="container lobby">
+    <div class="left-column">
+        <h2>Не готовы</h2>
+        <ul class="player-list">
+            {% for p in players %}
+                {% if not p.ready %}
+                    <li>{{ p.nickname }}</li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="center-column">
+        <h2>Код на C#</h2>
+        <pre class="code-block">using System;
 
-    <ul>
-        {% for p in players %}
-            <li>
-                {{ p.nickname }} —
+public class Game
+{
+    public static void Main()
+    {
+        Console.WriteLine("Добро пожаловать в Smeshnyavka!");
+        // Логика игры будет добавлена позже
+    }
+}</pre>
+    </div>
+    <div class="right-column">
+        <h2>Готовы</h2>
+        <ul class="player-list">
+            {% for p in players %}
                 {% if p.ready %}
-                    <strong>Готов</strong>
-                {% else %}
-                    Не готов
+                    <li>{{ p.nickname }}</li>
                 {% endif %}
-                {% if me and p == me %}
-                    <form action="{% url 'game:toggle_ready' code=game.code %}" method="post" style="display:inline">
-                        {% csrf_token %}
-                        <button type="submit">
-                            {% if me.ready %}Снять готов{% else %}Я готов{% endif %}
-                        </button>
-                    </form>
-                {% endif %}
-            </li>
-        {% endfor %}
-    </ul>
-
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+<div class="status">
     {% if game.started %}
         <p><strong>Игра началась!</strong></p>
-        <!-- Тут можно сделать редирект на игровой экран -->
     {% else %}
         <p>Ждём, пока все игроки нажмут «Я готов»…</p>
     {% endif %}
+    {% if me %}
+        <form action="{% url 'game:toggle_ready' code=game.code %}" method="post" class="ready-form">
+            {% csrf_token %}
+            <button type="submit">
+                {% if me.ready %}Снять готовность{% else %}Я готов{% endif %}
+            </button>
+        </form>
+    {% endif %}
+</div>
 {% endblock %}

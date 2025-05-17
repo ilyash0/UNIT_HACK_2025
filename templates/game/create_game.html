@@ -1,13 +1,17 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Игра{% endblock %}
+{% block title %}Создать игру{% endblock %}
 
 {% block content %}
-    <form method="post">
+<div class="container form-container">
+    <h2>Создать игру</h2>
+    <form method="post" class="game-form">
         {% csrf_token %}
-        <label>Ваш никнейм:
-            <input type="text" name="nickname" value="{{ nickname }}" required>
-        </label><br>
+        <div class="form-group">
+            <label for="nickname">Ваш никнейм:</label>
+            <input type="text" name="nickname" id="nickname" value="{{ nickname }}" required>
+        </div>
         <button type="submit">Создать игру</button>
     </form>
+</div>
 {% endblock %}
