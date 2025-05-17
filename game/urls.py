@@ -17,7 +17,8 @@ Including another URLconf
 from django.urls import path, re_path
 
 from .consumers import PlayerConsumer
-from .views import HomePageView, PlayerConnectAPIView
+from .views.API import PlayerConnectAPIView
+from .views.pages import HomePageView
 
 app_name = 'game'
 
