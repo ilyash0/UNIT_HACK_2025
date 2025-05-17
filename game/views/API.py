@@ -3,12 +3,14 @@ from json import loads
 from django.core.cache import cache
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
 from django.utils import timezone
+from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
 from ..models import Player
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class PlayerConnectAPIView(View):
     """
     API для подключения (регистрации) игрока.
@@ -19,7 +21,6 @@ class PlayerConnectAPIView(View):
     В ответ всегда отправляет "OK" или 400 при ошибке.
     """
 
-    @csrf_exempt
     def post(self, request, *args, **kwargs):
         try:
             data = request.json if hasattr(request, 'json') else loads(request.body)
@@ -39,7 +40,6 @@ class PlayerConnectAPIView(View):
 
         return HttpResponse(status=204)
 
-    @csrf_exempt
     def get(self, request, *args, **kwargs):
         players = Player.objects.order_by('joined_at')
         data = [
@@ -54,6 +54,7 @@ class PlayerConnectAPIView(View):
         return JsonResponse({'players': data})
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class PlayerAnswerAPIView(View):
     """
     API для приёма ответов пользователей и их кэширования.
@@ -67,7 +68,6 @@ class PlayerAnswerAPIView(View):
 
     CACHE_TIMEOUT = 5 * 60
 
-    @csrf_exempt
     def post(self, request, *args, **kwargs):
         try:
             data = request.json if hasattr(request, 'json') else loads(request.body)
@@ -84,6 +84,7 @@ class PlayerAnswerAPIView(View):
         return HttpResponse(status=204)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class VoteAPIView(View):
     """
     API для голосования за лучший ответ.
@@ -96,7 +97,6 @@ class VoteAPIView(View):
 
     CACHE_TIMEOUT = 60
 
-    @csrf_exempt
     def post(self, request, *args, **kwargs):
         try:
             data = request.json if hasattr(request, 'json') else loads(request.body)
