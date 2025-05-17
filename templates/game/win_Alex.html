@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Результаты игры</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html { height: 100%; }
+
+    .winning-container {
+      width: 100%;
+      height: 100vh;
+      background-image: url('images/Matrix.jpg');
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      font-family: 'Pixelify Sans', sans-serif;
+    }
+
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      z-index: 1;
+    }
+
+    .content {
+      position: relative;
+      z-index: 2;
+      width: 90%;
+      max-width: 650px;
+      padding: 15px;
+      text-align: center;
+    }
+
+    .title {
+      font-size: 38px;
+      color: #f58b2e;
+      text-shadow: 0 0 8px #f58b2e, 2px 2px 4px #000;
+      font-weight: bold;
+      margin-bottom: 12px;
+      animation: pulse 2s infinite;
+    }
+
+    .winner {
+      background-color: rgba(107, 193, 8, 0.3);
+      border: 2px solid #6bc108;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      box-shadow: 0 0 15px rgba(107, 193, 8, 0.5);
+      animation: glow 3s infinite alternate;
+    }
+
+    .winner-name {
+      font-size: 24px;
+      color: #6bc108;
+      text-shadow: 0 0 4px #6bc108;
+      margin-bottom: 4px;
+    }
+
+    .winner-score {
+      font-size: 20px;
+      color: #fff;
+    }
+
+    .players-list {
+      background-color: rgba(32, 32, 32, 0.7);
+      border: 2px solid #b4fc64;
+      border-radius: 8px;
+      padding: 8px;
+      margin-bottom: 12px;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+
+    .player-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 8px;
+      border-bottom: 1px solid rgba(180, 252, 100, 0.3);
+      font-size: 14px;
+      color: #fff;
+      min-height: 30px;
+    }
+
+    .player-item:last-child {
+      border-bottom: none;
+    }
+
+    .player-position {
+      color: #ff9c45;
+      min-width: 22px;
+      text-align: right;
+    }
+
+    .player-name {
+      flex-grow: 1;
+      text-align: left;
+      padding: 0 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .player-score {
+      color: #f64747;
+      min-width: 50px;
+      text-align: right;
+    }
+
+    .empty-slot {
+      color: rgba(255, 255, 255, 0.4);
+      font-style: italic;
+    }
+
+    .button {
+      background-color: #f64747;
+      color: white;
+      border: none;
+      padding: 8px 25px;
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Pixelify Sans', sans-serif;
+      transition: all 0.3s;
+      margin-top: 8px;
+    }
+
+    .button:hover {
+      background-color: #ff5e5e;
+      transform: scale(1.05);
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+
+    @keyframes glow {
+      from { box-shadow: 0 0 15px rgba(107, 193, 8, 0.5); }
+      to { box-shadow: 0 0 20px rgba(107, 193, 8, 0.7); }
+    }
+
+    /* Стили для скроллбара */
+    .players-list::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .players-list::-webkit-scrollbar-track {
+      background: rgba(32, 32, 32, 0.3);
+      border-radius: 2px;
+    }
+
+    .players-list::-webkit-scrollbar-thumb {
+      background-color: #b4fc64;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="winning-container">
+    <div class="overlay"></div>
+    
+    <div class="content">
+      <h1 class="title">ПОБЕДА!</h1>
+      
+      <div class="winner">
+        <div class="winner-name">Игрок 1</div>
+        <div class="winner-score">13183</div>
+      </div>
+      
+      <div class="players-list">
+        <div class="player-item">
+          <span class="player-position">2.</span>
+          <span class="player-name">Игрок4</span>
+          <span class="player-score">11323</span>
+        </div>
+        <div class="player-item">
+          <span class="player-position">3.</span>
+          <span class="player-name">Игрок6</span>
+          <span class="player-score">9194</span>
+        </div>
+        <div class="player-item">
+          <span class="player-position">4.</span>
+          <span class="player-name">Игрок8</span>
+          <span class="player-score">5219</span>
+        </div>
+        <div class="player-item">
+          <span class="player-position">5.</span>
+          <span class="player-name">Игрок9</span>
+          <span class="player-score">5361</span>
+        </div>
+        <div class="player-item">
+          <span class="player-position">6.</span>
+          <span class="player-name">Игрок1</span>
+          <span class="player-score">4618</span>
+        </div>
+        <div class="player-item">
+          <span class="player-position">7.</span>
+          <span class="player-name">Игрок10</span>
+          <span class="player-score">4638</span>
+        </div>
+        <div class="player-item">
+          <span class="player-position">8.</span>
+          <span class="player-name">Игрок3</span>
+          <span class="player-score">3632</span>
+        </div>
+        <div class="player-item">
+          <span class="player-position">9.</span>
+          <span class="player-name">Игрок6</span>
+          <span class="player-score">5640</span>
+        </div>
+        <div class="player-item">
+          <span class="player-position">10.</span>
+          <span class="player-name">Игрок6</span>
+          <span class="player-score">6216</span>
+        </div>
+        <div class="player-item">
+          <span class="player-position">11.</span>
+          <span class="player-name empty-slot">-</span>
+          <span class="player-score empty-slot">-</span>
+        </div>
+        <div class="player-item">
+          <span class="player-position">12.</span>
+          <span class="player-name empty-slot">-</span>
+          <span class="player-score empty-slot">-</span>
+        </div>
+      </div>
+      
+      <button class="button">ВЕРНУТЬСЯ В ЛОББИ</button>
+    </div>
+  </div>
+
+</body>
+</html>
