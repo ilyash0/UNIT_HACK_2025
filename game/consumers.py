@@ -9,7 +9,7 @@ class PlayerConsumer(AsyncJsonWebsocketConsumer):
 
         from .models import Player
         players = await database_sync_to_async(list)(
-            Player.objects.order_by('joined_at').values('id', 'username', 'joined_at'))
+            Player.objects.order_by('joined_at').values('id', 'username'))
         await self.send_json({'type': 'init', 'players': players})
 
     async def disconnect(self, close_code):
