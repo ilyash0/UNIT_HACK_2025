@@ -138,21 +138,21 @@ class PromptAPIView(View):
 
     def get(self, request, *args, **kwargs):
         """
-            GET /api/get_prompt/?user_id=<ID>
+            GET /api/get_prompt/?telegram_id=<ID>
             На вход принимает user_id: int
             В ответ отправляет JSON: {
-                "user_id": int,         # идентификатор пользователя
+                "telegram_id": int,         # идентификатор пользователя
                 "prompt": str      # фраза
             }
         """
-        user_id = request.GET.get('user_id')
+        telegram_id = request.GET.get('telegram_id')
         start_time = time()
 
         while time() - start_time < self.timeout:
-            player = Player.objects.get(telegram_id=user_id)
+            player = Player.objects.get(telegram_id=telegram_id)
             if player.prompt is not None:
                 return JsonResponse({
-                    'user_id': user_id,
+                    'telegram_id': telegram_id,
                     'prompt': player.prompt
                 })
 
