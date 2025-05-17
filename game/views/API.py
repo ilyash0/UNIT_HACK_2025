@@ -1,8 +1,8 @@
 from json import loads
 
 from django.http import JsonResponse, HttpResponseBadRequest
-from django.views import View
 from django.utils import timezone
+from django.views import View
 
 from ..models import Player
 

@@ -145,6 +145,7 @@ button:hover {
     .container {
         flex-direction: column;
     }
+
     .main-menu .left-column,
     .main-menu .right-column,
     .lobby .left-column,

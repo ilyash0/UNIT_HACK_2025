@@ -15,7 +15,6 @@ from django.core.asgi import get_asgi_application
 
 import game.urls
 
-
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'UNIT_HACK_2025.settings')
 
 django_asgi_app = get_asgi_application()
