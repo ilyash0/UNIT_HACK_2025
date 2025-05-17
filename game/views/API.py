@@ -4,6 +4,7 @@ from django.core.cache import cache
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
 from django.utils import timezone
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 
 from ..models import Player
 
@@ -18,6 +19,7 @@ class PlayerConnectAPIView(View):
     В ответ всегда отправляет "OK" или 400 при ошибке.
     """
 
+    @csrf_exempt
     def post(self, request, *args, **kwargs):
         try:
             data = request.json if hasattr(request, 'json') else loads(request.body)
@@ -37,6 +39,7 @@ class PlayerConnectAPIView(View):
 
         return HttpResponse("OK")
 
+    @csrf_exempt
     def get(self, request, *args, **kwargs):
         players = Player.objects.order_by('joined_at')
         data = [
@@ -64,6 +67,7 @@ class PlayerAnswerAPIView(View):
 
     CACHE_TIMEOUT = 5 * 60
 
+    @csrf_exempt
     def post(self, request, *args, **kwargs):
         try:
             data = request.json if hasattr(request, 'json') else loads(request.body)
@@ -92,6 +96,7 @@ class VoteAPIView(View):
 
     CACHE_TIMEOUT = 60
 
+    @csrf_exempt
     def post(self, request, *args, **kwargs):
         try:
             data = request.json if hasattr(request, 'json') else loads(request.body)
