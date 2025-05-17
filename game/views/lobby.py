@@ -54,7 +54,8 @@ class JoinGameView(View):
             return HttpResponseBadRequest("Необходимо указать код игры и ваш никнейм")
 
         game = get_object_or_404(Game, code=code)
-        if game.started:
+        player_exists = Player.objects.filter(game=game, nickname=nickname).exists()
+        if game.started and not player_exists:
             return HttpResponseBadRequest("Игра уже началась")
 
         Player.objects.get_or_create(game=game, nickname=nickname)
