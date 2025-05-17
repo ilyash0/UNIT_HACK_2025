@@ -1,6 +1,8 @@
 from json import loads
 from time import time, sleep
 
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.core.cache import cache
 from django.db import transaction, IntegrityError
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
@@ -16,8 +18,8 @@ from ..models import Player
 class PlayerConnectAPIView(View):
     """
     API для подключения (регистрации) игрока.
-    Ожидает POST-запрос с данными JSON: { '
-        telegram_id': int,
+    Ожидает POST-запрос с данными JSON: {
+        'telegram_id': int,
         'username': str
     }
     В ответ всегда отправляет "OK" или 400 при ошибке.
@@ -45,6 +47,18 @@ class PlayerConnectAPIView(View):
             player.username = username
             player.joined_at = timezone.now()
             player.save()
+
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            'players',
+            {
+                'type': 'player_joined',
+                'player': {
+                    'id': player.id,
+                    'username': player.username,
+                },
+            }
+        )
 
         return HttpResponse(status=204)
 
