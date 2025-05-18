@@ -1,5 +1,6 @@
 from math import ceil
 
+from django.shortcuts import redirect
 from django.views.generic import TemplateView
 
 from game.models import Prompt
@@ -29,6 +30,9 @@ class WaitingPageView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         players = get_players()
+
+        if len(players) < 4:
+            return redirect("game:home")
 
         num_prompts = ceil(len(players) / 2)
         prompts = Prompt.objects.order_by('?')[:num_prompts]
