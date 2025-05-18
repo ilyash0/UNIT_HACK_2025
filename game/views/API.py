@@ -141,7 +141,6 @@ class PlayerAnswerAPIView(View):
             if prompt_index is None:
                 sleep(self.interval)
                 prompt_index = cache.get("prompt_index", None)
-                cache.set("prompt_index", prompt_index + 1, timeout=300)
             else:
                 break
 
@@ -184,7 +183,7 @@ class VoteAPIView(View):
         except (ValueError, KeyError, TypeError):
             return HttpResponseBadRequest('Invalid JSON payload')
 
-        prompt_index = cache.get("prompt_index", None)
+        prompt_index = cache.get("prompt_index")
         voter = Player.objects.get(telegram_id=voter_id)
         if voter.is_voted:
             return HttpResponseBadRequest('Already voted')
@@ -202,6 +201,7 @@ class VoteAPIView(View):
                 p.is_voted = False
 
             players = Player.objects.order_by('prompt')[prompt_index - 1:2 * prompt_index]
+            cache.set("prompt_index", prompt_index + 1, timeout=300)
 
             result = {
                 'all_voted': prompt_index == ceil(Player.objects.count() / 2),
