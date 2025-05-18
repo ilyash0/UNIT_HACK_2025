@@ -1,6 +1,6 @@
 import logging
 from asyncio import sleep
-from json import loads
+from json import loads, JSONDecodeError
 from math import ceil
 from time import time
 
@@ -29,10 +29,20 @@ class PlayerConnectAPIView(View):
     """
 
     def post(self, request, *args, **kwargs):
+        logging.debug(f"Raw request body: {request.body!r}")
+
+        content_type = request.META.get('CONTENT_TYPE', '')
+        if 'application/json' not in content_type:
+            logging.error(f"Unexpected Content-Type: {content_type}")
+            return HttpResponseBadRequest("Content-Type must be application/json")
+
         try:
-            data = request.json if hasattr(request, 'json') else loads(request.body)
+            data = loads(request.body.decode('utf-8'))
             tg_id = data['telegram_id']
             username = data.get('username', '')
+        except JSONDecodeError:
+            logging.error("JSONDecodeError: malformed JSON")
+            return HttpResponseBadRequest("Malformed JSON payload")
         except (ValueError, KeyError):
             logging.log(1, 'Invalid data')
             return HttpResponseBadRequest('Invalid data')
