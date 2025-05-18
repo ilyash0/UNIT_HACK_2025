@@ -205,7 +205,7 @@ class VoteAPIView(View):
 
             result = {
                 'all_voted': prompt_index == ceil(Player.objects.count() / 2),
-                "prompt": players[0].prompt,
+                "prompt": players[0].prompt.phrase,
                 "player0": {
                     "username": players[0].username,
                     "answer": players[0].answer,
