@@ -1,42 +1,30 @@
+{% extends 'base.html' %}
+{% load static %}
 
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <title>Страница показа ответов игроков</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+{% block title %}Страница показа ответов игроков{% endblock %}
 
-
-  <style>
+{% block styles %}
+<style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body, html { height: 100%; }
-
-
 
     .grid {
       display: grid;
       width: 100%;
       height: 100vh;
-      /* фиксируем ширину боковых колонок и «открываем» центр */
       grid-template-columns: 270px 1fr 270px;
-      /* задаём высоту трёх рядов: верхний, средний (растягивающийся), нижний */
       grid-template-rows: 100px auto 100px;
-      /* именованные области */
       grid-template-areas:
         "lt   center  rt"
         "lm   center  rm"
         "lb   center  rb";
     }
 
-    /* присваиваем каждой ячейке своё имя области */
     .lt {
         font-size: 30px;
         font-weight: bold;
         color: #b4fc64;
         grid-area: lt;
-
     }
     
     .lm {
@@ -72,58 +60,50 @@
         grid-area: rb;
     }
 
-    /* .center {
-    text-shadow: 1px 1px 3px black;
-    background-color: rgba(0,0,0,0.3);
-    background-blend-mode: overlay;
-    } */
-
     .center {
-        
         padding: 50px;
         font-size: 30px;
         color: #ffffff;
         grid-area: center;
-        /* Добавляем фоновое изображение */
-        background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('../../static/images/background.jpg'); /* Замените на URL вашего изображения */
-        background-size: cover; /* Растягиваем изображение на весь блок */
-        background-position: center; /* Центрируем изображение */
-        background-repeat: no-repeat; /* Запрещаем повторение */
-        
-        /* Дополнительные стили для лучшего отображения текста */
+        background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{% static 'images/background.jpg' %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
         text-shadow: 1px 1px 3px black;
-        
-      font-family: 'Pixelify Sans', sans-serif;
-      align-items: center;
-      justify-content: center;
-      display: flex;
+        font-family: 'Pixelify Sans', sans-serif;
+        align-items: center;
+        justify-content: center;
+        display: flex;
     }
 
-
-    /* общий стиль ячеек */
     .cell {
       border: 3px solid #333;
       background: #202020;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-color:  #b4fc64;
+      border-color: #b4fc64;
       font-family: 'Pixelify Sans', sans-serif;
-      
     }
-  </style>
-</head>
-<body>
+</style>
+{% endblock %}
 
-  <div class="grid">
-
-    <div class="cell lt"> 
-        Игрок1
+{% block content %}
+<div class="grid">
+    <div class="cell lt">
+        {% if players.0 %}
+            {{ players.0 }}
+        {% else %}
+            Игрок1
+        {% endif %}
     </div>
 
-
     <div class="cell lm">
-        Фу, тут мусором воняет!
+        {% if players.0 %}
+            Ответ игрока 1
+        {% else %}
+            Фу, тут мусором воняет!
+        {% endif %}
     </div>
 
     <div class="cell lb">
@@ -135,17 +115,23 @@
     </div>
 
     <div class="cell rt">
-        Игрок2
+        {% if players.1 %}
+            {{ players.1 }}
+        {% else %}
+            Игрок2
+        {% endif %}
     </div>
 
     <div class="cell rm">
-        Мужики, а пописать можно выйти?
+        {% if players.1 %}
+            Ответ игрока 2
+        {% else %}
+            Мужики, а пописать можно выйти?
+        {% endif %}
     </div>
 
     <div class="cell rb">
         #2
     </div>
-  </div>
-
-</body>
-</html>
+</div>
+{% endblock %}

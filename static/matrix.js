@@ -5,18 +5,9 @@
 
 {% block styles %}
 <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body, html { 
-        height: 100%; 
-        margin: 0; /* Remove default browser margins to eliminate white border */
-    }
-
     .waiting-container {
         width: 100%;
         height: 100vh;
-        background-image: url('{% static 'images/background.jpg' %}');
-        background-size: cover;
-        background-position: center;
         position: relative;
         display: flex;
         justify-content: center;
@@ -55,13 +46,6 @@
         font-weight: bold;
         margin-bottom: 24px;
         animation: pulse 2s infinite;
-    }
-
-    .hint {
-        font-size: 35.5px; /* 24px * 1.2, smaller than title for hierarchy */
-        color: #6bc108;
-        text-shadow: 1.2px 1.2px 2.4px #000; /* Scaled down from title's shadow */
-        margin-bottom: 100px;
     }
 
     .loading {
@@ -105,7 +89,6 @@
     <div class="overlay"></div>
     <div class="content">
         <h1 class="title">Ожидаем ответов других игроков</h1>
-        <div class="hint">Проверьте свой телефон</div>
         <div class="loading">
             <div class="dot"></div>
             <div class="dot"></div>

@@ -8,13 +8,23 @@ def get_players():
 
 class HomePageView(TemplateView):
     """
-    Отображает главную страницу визуалом и списком всех присоединившихся игроков.
+    Отображает страницу ожидания с списком игроков и QR-кодом
     """
-    template_name = 'game/home.html'
+    template_name = 'game/home.html'  # Путь к вашему новому шаблону
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['players'] = get_players()
+        
+        # Получаем список активных игроков
+        active_players = get_players()
+        
+        # Создаем список из 12 элементов (10 игроков + 2 пустых слота)
+        players_list = list(active_players) + [None]*(12 - len(active_players))
+        
+        context.update({
+            'players': players_list,
+            'qr_code_url': 'images/qr.png'  # Путь к QR-коду
+        })
         return context
 
 
@@ -45,6 +55,7 @@ class WinPageView(TemplateView):
         return context
     
 """
+Вьюшку для win`а с чатом накидал
 from django.views.generic import TemplateView
 from .models import Player  # ваша модель игрока
 
