@@ -1,4 +1,9 @@
+from math import ceil
+
+from django.shortcuts import redirect
 from django.views.generic import TemplateView
+
+from game.models import Prompt
 
 
 def get_players():
@@ -8,23 +13,14 @@ def get_players():
 
 class HomePageView(TemplateView):
     """
-    Отображает страницу ожидания с списком игроков и QR-кодом
+    Отображает страницу ожидания со списком игроков и QR-кодом
     """
     template_name = 'game/home.html'  # Путь к вашему новому шаблону
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
-        # Получаем список активных игроков
-        active_players = get_players()
-        
-        # Создаем список из 12 элементов (10 игроков + 2 пустых слота)
-        players_list = list(active_players) + [None]*(12 - len(active_players))
-        
-        context.update({
-            'players': players_list,
-            'qr_code_url': 'images/qr.png'  # Путь к QR-коду
-        })
+        players = get_players()
+        context['players'] = players
         return context
 
 
@@ -33,7 +29,20 @@ class WaitingPageView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['players'] = get_players()
+        players = get_players()
+
+        if len(players) < 4:
+            return redirect("game:home")
+
+        num_prompts = ceil(len(players) / 2)
+        prompts = Prompt.objects.order_by('?')[:num_prompts]
+
+        for i, player in enumerate(players):
+            prompt_index = i // 2
+            player.prompt = prompts[prompt_index]
+            player.save()
+
+        context['players'] = players
         return context
 
 

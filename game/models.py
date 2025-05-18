@@ -28,6 +28,7 @@ class Player(models.Model):
     prompt = models.ForeignKey(Prompt, on_delete=models.CASCADE, null=True)
     answer = models.TextField(null=True, blank=True)
     vote_count = models.IntegerField(null=True, blank=True)
+    is_voted = models.BooleanField(default=False)
 
     def __str__(self):
         return self.username

@@ -5,17 +5,42 @@
 
 
 {% block content %}
-<div class="waiting-container">
-    <canvas id="matrix"></canvas>
-    <div class="overlay"></div>
-    <div class="content">
-        <h1 class="title">Ожидаем ответов других игроков</h1>
-        <div class="hint">Проверьте свой телефон</div>
-        <div class="loading">
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
+    <div class="waiting-container">
+        <canvas id="matrix"></canvas>
+        <div class="overlay"></div>
+        <div class="content">
+            <h1 class="title">Ожидаем ответов других игроков</h1>
+            <div class="hint">Проверьте свой телефон</div>
+            <div class="loading">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
         </div>
     </div>
-</div>
+
+    <script>
+        (function () {
+            const socket = new WebSocket(
+                (window.location.protocol === 'https:' ? 'wss://' : 'ws://')
+                + window.location.host
+                + '/ws/players/'
+            );
+
+            socket.onopen = function (e) {
+                console.log("WebSocket соединение открыто");
+            };
+            socket.onclose = function (e) {
+                console.log("WebSocket соединение закрыто");
+            };
+
+            socket.onmessage = function (e) {
+                let data = JSON.parse(e.data);
+                if (data.action === 'redirect') {
+                    window.location.href = data.url;
+                }
+            };
+        })();
+    </script>
+
 {% endblock %}

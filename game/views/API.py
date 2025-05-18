@@ -1,7 +1,10 @@
-from json import loads
-from time import time, sleep
+import logging
+from asyncio import sleep
+from json import loads, JSONDecodeError
+from math import ceil
+from time import time
 
-from asgiref.sync import async_to_sync
+from asgiref.sync import async_to_sync, sync_to_async
 from channels.layers import get_channel_layer
 from django.core.cache import cache
 from django.db import transaction, IntegrityError
@@ -27,10 +30,18 @@ class PlayerConnectAPIView(View):
 
     def post(self, request, *args, **kwargs):
         try:
-            data = request.json if hasattr(request, 'json') else loads(request.body)
+            if request.content_type == 'application/json':
+                data = loads(request.body)
+            else:
+                data = request.POST
+
             tg_id = data['telegram_id']
             username = data.get('username', '')
+        except JSONDecodeError:
+            logging.error("JSONDecodeError: malformed JSON")
+            return HttpResponseBadRequest("Malformed JSON payload")
         except (ValueError, KeyError):
+            logging.log(1, 'Invalid data')
             return HttpResponseBadRequest('Invalid data')
 
         try:
@@ -77,8 +88,12 @@ class PlayerAnswerAPIView(View):
             В ответ всегда отправляет 202 или 400 при ошибке.
         """
         try:
-            data = request.json if hasattr(request, 'json') else loads(request.body)
-            user_id = data['user_id']
+            if request.content_type == 'application/json':
+                data = loads(request.body)
+            else:
+                data = request.POST
+
+            user_id = data['telegram_id']
             answer = data['answer']
         except (ValueError, KeyError):
             return HttpResponseBadRequest('Invalid JSON payload')
@@ -86,6 +101,18 @@ class PlayerAnswerAPIView(View):
         player = Player.objects.get(telegram_id=user_id)
         player.answer = answer
         player.save()
+
+        total_players = Player.objects.count()
+        answered_players = Player.objects.filter(answer__isnull=False).count()
+
+        if answered_players >= total_players > 0:
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                'players',
+                {
+                    'type': 'all_answers_received',
+                }
+            )
 
         return HttpResponse(status=204)
 
@@ -105,7 +132,7 @@ class PlayerAnswerAPIView(View):
                     }
            }
         """
-        prompt_index = cache.get("prompt_index")
+        prompt_index = int(cache.get("prompt_index", "1"))
 
         players = Player.objects.order_by('prompt')[prompt_index - 1:2 * prompt_index]
 
@@ -147,9 +174,11 @@ class VoteAPIView(View):
         voter.is_voted = True
         voter.save()  # Сохраняем изменения
 
+
         candidate = Player.objects.get(telegram_id=candidate_id)
         candidate.vote_count += 1
         candidate.save()
+
 
         # Проверяем, все ли игроки проголосовали
         if not Player.objects.filter(is_voted=False).exists():
@@ -163,6 +192,7 @@ class VoteAPIView(View):
                 }
             )
 
+
         return HttpResponse(status=204)
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -170,7 +200,7 @@ class PromptAPIView(View):
     timeout = 10 * 60
     interval = 5
 
-    def get(self, request, *args, **kwargs):
+    async def get(self, request, *args, **kwargs):
         """
             GET /api/get_prompt/?telegram_id=<ID>
             На вход принимает user_id: int
@@ -183,23 +213,22 @@ class PromptAPIView(View):
         start_time = time()
 
         while time() - start_time < self.timeout:
-            player = Player.objects.get(telegram_id=telegram_id)
-            if player.prompt is not None:
+            player = await Player.objects.aget(telegram_id=telegram_id)
+            prompt = await sync_to_async(lambda: player.prompt)()
+            if prompt is not None:
                 return JsonResponse({
                     'telegram_id': telegram_id,
                     'prompt': player.prompt.phrase
                 })
 
-            sleep(self.interval)
+            await sleep(self.interval)
 
         return HttpResponse(status=408)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
 class PlayerCountAPIView(View):
-    def get(self, request, *args, **kwargs):
-        players_count = Player.objects.count()
-        if players_count % 2 == 1:
-            players_count += 1
-        players_count /= 2
-        return JsonResponse(players_count)
+    async def get(self, request, *args, **kwargs):
+        count = await Player.objects.acount()
+        players_pairs_count = ceil(count / 2)
+        return JsonResponse({'count': players_pairs_count})

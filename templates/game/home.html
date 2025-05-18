@@ -10,27 +10,143 @@
         <div class="content">
             <h1 class="title">OЖИДАНИЕ ИГРOКOВ</h1>
 
-            <div class="players-list" style="border: none; background-color: transparent;">
-                {% for player in players %}
-                    <div class="player-card">
-                        {% if player %}
-                            {{ player }}
-                        {% else %}
-                            Ожидание...
-                        {% endif %}
-                    </div>
-                {% endfor %}
+            <div id="players-list" class="players-list" style="border: none; background-color: transparent;">
             </div>
 
             <div class="qr-container">
-                <img src="{% static qr_code_url %}" alt="QR-код для подключения">
+                <img src="{% static 'images/qr.png' %}" alt="QR-код для подключения">
             </div>
 
-            <div class="loading">
-                <div class="dot"></div>
-                <div class="dot"></div>
-                <div class="dot"></div>
+            <div id="countdown" style="display: none; font-size: 50px; margin-top: 20px; color: white; text-align: center; font-family: 'Pixelify Sans', sans-serif;"></div>
+
+            <div class="loading" style="display: flex; justify-content: center; align-items: center; gap: 10px;">
+                <div class="dot" style="width: 15px; height: 15px; background-color: white; border-radius: 50%;"></div>
+                <div class="dot" style="width: 15px; height: 15px; background-color: white; border-radius: 50%;"></div>
+                <div class="dot" style="width: 15px; height: 15px; background-color: white; border-radius: 50%;"></div>
             </div>
         </div>
     </div>
+
+    <script>
+    let playerCount = 0;
+    let countdownInterval = null;
+    let countdownTime = 10;
+
+    function startTimer() {
+        console.log('startTimer вызван, playerCount:', playerCount);
+        if (countdownInterval !== null) {
+            clearInterval(countdownInterval);
+            console.log('Очищен предыдущий countdownInterval');
+        }
+
+        countdownTime = 10;
+        const countdownElement = document.getElementById('countdown');
+        countdownElement.textContent = countdownTime;
+        countdownElement.style.display = 'block';
+        document.querySelector('.loading').style.display = 'none';
+        console.log('Таймер отображен, countdownTime:', countdownTime);
+
+        countdownInterval = setInterval(function() {
+            countdownTime--;
+            countdownElement.textContent = countdownTime;
+            console.log('Обновлен countdownTime:', countdownTime);
+
+            if (countdownTime <= 0) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+                countdownElement.style.display = 'none';
+                document.querySelector('.loading').style.display = 'flex';
+                console.log('Таймер завершен, playerCount:', playerCount);
+
+                if (playerCount % 2 === 0) {
+                    console.log('Перенаправление, так как playerCount четное');
+                    window.location.href = '{% url "game:waiting" %}';
+                } else {
+                    console.log('Перезапуск таймера, так как playerCount нечетное');
+                    startTimer();
+                }
+            }
+        }, 1000);
+    }
+
+    function updateTimer() {
+        console.log('updateTimer вызван, playerCount:', playerCount);
+        if (playerCount >= 4) {
+            if (countdownInterval === null) {
+                console.log('Запуск startTimer, так как playerCount >= 4');
+                startTimer();
+            }
+        } else {
+            if (countdownInterval !== null) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+                document.getElementById('countdown').style.display = 'none';
+                document.querySelector('.loading').style.display = 'flex';
+                console.log('Таймер остановлен, так как playerCount < 4');
+            }
+        }
+    }
+
+    const list = document.getElementById('players-list');
+    const socket = new WebSocket(
+        (window.location.protocol === 'https:' ? 'wss://' : 'ws://')
+        + window.location.host
+        + '/ws/players/'
+    );
+
+    socket.onopen = function () {
+        console.log('WebSocket соединение открыто');
+    };
+
+    socket.onmessage = function (e) {
+        console.log('Получено WebSocket сообщение:', e.data);
+        const data = JSON.parse(e.data);
+
+        if (data.type === 'init') {
+            list.innerHTML = '';
+            data.players.forEach(function(player) {
+                const div = document.createElement('div');
+                div.textContent = player.username;
+                div.dataset.id = player.id;
+                div.classList.add('player-card');
+                list.append(div);
+            });
+            playerCount = data.players.length;
+            console.log('Инициализация, playerCount:', playerCount);
+            updateTimer();
+        }
+
+        if (data.type === 'new_player') {
+            const exists = list.querySelector(`.player-card[data-id="${data.player.id}"]`);
+            if (!exists) {
+                const div = document.createElement('div');
+                div.textContent = data.player.username;
+                div.dataset.id = data.player.id;
+                div.classList.add('player-card');
+                list.append(div);
+                playerCount++;
+                console.log('Новый игрок, playerCount:', playerCount);
+                updateTimer();
+            }
+        }
+
+        if (data.type === 'player_left') {
+            const toRemove = list.querySelector(`.player-card[data-id="${data.player.id}"]`);
+            if (toRemove) {
+                toRemove.remove();
+                playerCount--;
+                console.log('Игрок покинул, playerCount:', playerCount);
+                updateTimer();
+            }
+        }
+    };
+
+    socket.onerror = function (error) {
+        console.error('WebSocket ошибка:', error);
+    };
+
+    socket.onclose = function (e) {
+        console.log('WebSocket закрыт, код:', e.code);
+    };
+    </script>
 {% endblock %}
