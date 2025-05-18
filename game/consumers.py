@@ -1,3 +1,5 @@
+from json import dumps
+
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
@@ -20,9 +22,9 @@ class PlayerConsumer(AsyncJsonWebsocketConsumer):
         await self.send_json({'type': 'new_player', 'player': event['player']})
 
     async def all_voted(self, event):
-            message = event['message']
-            await self.send(text_data=json.dumps(message))
-          
+        message = event['message']
+        await self.send(text_data=dumps(message))
+
     async def all_answers_received(self, event):
         url = event.get('url', '/game/vote/')
         await self.send_json({

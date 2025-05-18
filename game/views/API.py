@@ -190,11 +190,9 @@ class VoteAPIView(View):
         voter.is_voted = True
         voter.save()  # Сохраняем изменения
 
-
         candidate = Player.objects.get(telegram_id=candidate_id)
         candidate.vote_count += 1
         candidate.save()
-
 
         # Проверяем, все ли игроки проголосовали
         if not Player.objects.filter(is_voted=False).exists():
@@ -208,8 +206,8 @@ class VoteAPIView(View):
                 }
             )
 
-
         return HttpResponse(status=204)
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class PromptAPIView(View):
