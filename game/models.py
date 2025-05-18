@@ -25,7 +25,7 @@ class Player(models.Model):
     telegram_id = models.BigIntegerField(unique=True)
     username = models.CharField(max_length=50)
     joined_at = models.DateTimeField(auto_now_add=True)
-    prompt_id = models.ForeignKey(Prompt, on_delete=models.CASCADE, null=True)
+    prompt = models.ForeignKey(Prompt, on_delete=models.CASCADE, null=True)
     answer = models.TextField(null=True, blank=True)
     vote_count = models.IntegerField(null=True, blank=True)
     is_voted = models.BooleanField(default=False)
