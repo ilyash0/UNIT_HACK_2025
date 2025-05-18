@@ -184,39 +184,50 @@ class VoteAPIView(View):
             return HttpResponseBadRequest('Invalid JSON payload')
 
         prompt_index = cache.get("prompt_index")
+        voter = Player.objects.get(telegram_id=voter_id)
+        if voter.is_voted:
+            return HttpResponseBadRequest('Already voted')
+
+        voter.is_voted = True
+        voter.save()  # Сохраняем изменения
 
         candidate = Player.objects.get(telegram_id=candidate_id)
         candidate.vote_count = 0 if candidate.is_voted is None else candidate.is_voted
         candidate.vote_count += 1
         candidate.save()
 
-        players = Player.objects.all().order_by('prompt')[prompt_index - 1:2 * prompt_index]
-        cache.set("prompt_index", prompt_index + 1, timeout=300)
+        # Проверяем, все ли игроки проголосовали
+        if not Player.objects.filter(is_voted=False).exists():
+            for p in Player.objects.filter(is_voted=True):
+                p.is_voted = False
 
-        result = {
-            'all_voted': prompt_index == ceil(Player.objects.count() / 2),
-            "prompt": players[0].prompt.phrase,
-            "player0": {
-                "username": players[0].username,
-                "answer": players[0].answer,
-                'vote_count': players[0].vote_count or 0,
-            },
-            "player1": {
-                "username": players[1].username,
-                "answer": players[1].answer,
-                'vote_count': players[1].vote_count or 0,
-            },
-        }
+            players = Player.objects.all().order_by('prompt')[prompt_index - 1:2 * prompt_index]
+            cache.set("prompt_index", prompt_index + 1, timeout=300)
 
-        # Отправляем сообщение через WebSocket
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            'players',
-            {
-                'type': 'all_voted',
-                'message': result,
+            result = {
+                'all_voted': prompt_index == ceil(Player.objects.count() / 2),
+                "prompt": players[0].prompt.phrase,
+                "player0": {
+                    "username": players[0].username,
+                    "answer": players[0].answer,
+                    'vote_count': players[0].vote_count or 0,
+                },
+                "player1": {
+                    "username": players[1].username,
+                    "answer": players[1].answer,
+                    'vote_count': players[1].vote_count or 0,
+                },
             }
-        )
+
+            # Отправляем сообщение через WebSocket
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                'players',
+                {
+                    'type': 'all_voted',
+                    'message': result,
+                }
+            )
 
         return HttpResponse(status=204)
 
