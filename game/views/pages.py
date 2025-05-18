@@ -30,6 +30,7 @@ class WaitingPageView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        cache.clear()
         players = get_players()
 
         first_time = cache.add("prompts_assigned", True)
