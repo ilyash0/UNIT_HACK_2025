@@ -78,7 +78,7 @@ class PlayerConnectAPIView(View):
 class PlayerAnswerAPIView(View):
     CACHE_TIMEOUT = 5 * 60
     TIMEOUT = 10 * 60
-    interval = 5
+    interval = 15
 
     def post(self, request, *args, **kwargs):
         """
@@ -141,6 +141,7 @@ class PlayerAnswerAPIView(View):
             if prompt_index is None:
                 sleep(self.interval)
                 prompt_index = cache.get("prompt_index", None)
+                cache.set("prompt_index", prompt_index+1, timeout=300)
             else:
                 break
 
