@@ -144,9 +144,15 @@ class VoteAPIView(View):
         except (ValueError, KeyError, TypeError):
             return HttpResponseBadRequest('Invalid JSON payload')
 
-        player = Player.objects.get(telegram_id=candidate_id)
-        player.vote_count += 1
-        player.save()
+        voter = Player.objects.get(telegram_id=voter_id)
+        if voter.is_voted:
+            return HttpResponseBadRequest('Already voted')
+
+        voter.is_voted = True
+
+        candidate = Player.objects.get(telegram_id=candidate_id)
+        candidate.vote_count += 1
+        candidate.save()
 
         return HttpResponse(status=204)
 
