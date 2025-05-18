@@ -118,7 +118,7 @@ class PlayerAnswerAPIView(View):
 
         return HttpResponse(status=204)
 
-    async def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         """
            В ответ отправляет JSON: {
                 "prompt": str,
@@ -134,13 +134,13 @@ class PlayerAnswerAPIView(View):
                     }
            }
         """
-        prompt_index = await sync_to_async(cache.get)("prompt_index", None)
+        prompt_index = cache.get("prompt_index", None)
         start_time = time()
 
         while time() - start_time < self.TIMEOUT:
-            if prompt_index is  None:
-                await sleep(self.interval)
-                prompt_index = await sync_to_async(cache.get)("prompt_index", None)
+            if prompt_index is None:
+                sleep(self.interval)
+                prompt_index = cache.get("prompt_index", None)
             else:
                 break
 
@@ -150,8 +150,7 @@ class PlayerAnswerAPIView(View):
                 status=408
             )
 
-        qs = Player.objects.order_by("prompt")[prompt_index - 1: 2 * prompt_index]
-        players = await sync_to_async(list)(qs)
+        players = Player.objects.order_by('prompt')[prompt_index - 1:2 * prompt_index]
 
         result = {
             "prompt": players[0].prompt,
