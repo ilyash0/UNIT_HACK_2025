@@ -192,6 +192,7 @@ class VoteAPIView(View):
         voter.save()  # Сохраняем изменения
 
         candidate = Player.objects.get(telegram_id=candidate_id)
+        candidate.vote_count = 0 if candidate.is_voted is None else candidate.is_voted
         candidate.vote_count += 1
         candidate.save()
 
