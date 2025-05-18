@@ -63,7 +63,7 @@ class VotePageView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         cache.set("prompt_index", 1, timeout=300)
-        players = Player.objects.order_by('prompt_id')
+        players = Player.objects.order_by('prompt_id').all()
         context['prompt'] = players[0].prompt.phrase
         context['players'] = players
         return context

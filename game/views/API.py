@@ -150,7 +150,7 @@ class PlayerAnswerAPIView(View):
                 status=408
             )
 
-        players = Player.objects.order_by('prompt_id')[2 * (prompt_index - 1):2 * prompt_index]
+        players = Player.objects.order_by('prompt_id').all()[2 * (prompt_index - 1):2 * prompt_index]
 
         result = {
             "prompt": players[0].prompt.phrase,
