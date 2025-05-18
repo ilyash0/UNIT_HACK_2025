@@ -1,6 +1,7 @@
 from math import ceil
 
 from django.core.cache import cache
+from django.db import transaction
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
 
@@ -35,15 +36,16 @@ class WaitingPageView(TemplateView):
         first_time = cache.add("prompts_assigned", True)
 
         if first_time:
-            if len(players) < 4:
-                return redirect("game:home")
+            with transaction.atomic():
+                if len(players) < 4:
+                    return redirect("game:home")
 
-            num_prompts = ceil(len(players) / 2)
-            prompts = Prompt.objects.order_by('?')[:num_prompts]
+                num_prompts = ceil(len(players) / 2)
+                prompts = Prompt.objects.order_by('?')[:num_prompts]
 
-            for i, player in enumerate(players):
-                player.prompt = prompts[i // 2]
-                player.save()
+                for i, player in enumerate(players):
+                    player.prompt = prompts[i // 2]
+                    player.save()
 
         context['players'] = players
         return context
