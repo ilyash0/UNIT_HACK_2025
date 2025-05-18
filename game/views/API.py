@@ -1,4 +1,5 @@
 from json import loads
+from math import ceil
 from time import time, sleep
 
 from asgiref.sync import async_to_sync
@@ -190,8 +191,5 @@ class PromptAPIView(View):
 @method_decorator(csrf_exempt, name='dispatch')
 class PlayerCountAPIView(View):
     def get(self, request, *args, **kwargs):
-        players_count = Player.objects.count()
-        if players_count % 2 == 1:
-            players_count += 1
-        players_count /= 2
-        return JsonResponse(players_count)
+        players_pairs_count = ceil(len(Player.objects.count()) / 2)
+        return JsonResponse([players_pairs_count])
