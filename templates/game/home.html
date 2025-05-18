@@ -32,7 +32,7 @@
     function startTimer() {
         timerId = setTimeout(function() {
             if (playerCount % 2 === 0) {
-                window.location.href = '/wait/';
+                window.location.href = '{% url "game:waiting" %}';
             } else {
                 startTimer();
             }
