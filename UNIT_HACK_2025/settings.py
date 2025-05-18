@@ -26,6 +26,7 @@ SECRET_KEY = environ["SECRET_KEY"]
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
+CSRF_TRUSTED_ORIGINS = ["https://unit-hack-2025.onrender.com"]
 
 # Application definition
 
