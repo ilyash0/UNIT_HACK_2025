@@ -88,7 +88,11 @@ class PlayerAnswerAPIView(View):
             В ответ всегда отправляет 202 или 400 при ошибке.
         """
         try:
-            data = request.json if hasattr(request, 'json') else loads(request.body)
+            if request.content_type == 'application/json':
+                data = loads(request.body)
+            else:
+                data = request.POST
+
             user_id = data['telegram_id']
             answer = data['answer']
         except (ValueError, KeyError):
@@ -161,7 +165,11 @@ class VoteAPIView(View):
             В ответ всегда отправляет "OK" или 400 при ошибке.
         """
         try:
-            data = request.json if hasattr(request, 'json') else loads(request.body)
+            if request.content_type == 'application/json':
+                data = loads(request.body)
+            else:
+                data = request.POST
+
             voter_id = int(data['voter_id'])
             candidate_id = int(data['candidate_id'])
         except (ValueError, KeyError, TypeError):
