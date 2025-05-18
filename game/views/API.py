@@ -130,48 +130,40 @@ class VoteAPIView(View):
 
     def post(self, request, *args, **kwargs):
         try:
-            data = request.json if hasattr(request, 'json') else loads(request.body)
+            if request.content_type == 'application/json':
+                data = loads(request.body)
+            else:
+                data = request.POST
+
             voter_id = int(data['voter_id'])
             candidate_id = int(data['candidate_id'])
         except (ValueError, KeyError, TypeError):
             return HttpResponseBadRequest('Invalid JSON payload')
 
-<<<<<<< Updated upstream
-        player = Player.objects.get(telegram_id=candidate_id)
-        player.vote_count += 1
-        player.save()
-=======
         voter = Player.objects.get(telegram_id=voter_id)
         if voter.is_voted:
             return HttpResponseBadRequest('Already voted')
 
         voter.is_voted = True
-        voter.save()
+        voter.save()  # Сохраняем изменения
 
         candidate = Player.objects.get(telegram_id=candidate_id)
         candidate.vote_count += 1
         candidate.save()
->>>>>>> Stashed changes
 
-        print(f"After vote: {voter.username} voted, candidate {candidate.username} now has {candidate.vote_count} votes")
-        remaining = Player.objects.filter(is_voted=False).count()
-        print(f"Players yet to vote: {remaining}")
-
+        # Проверяем, все ли игроки проголосовали
         if not Player.objects.filter(is_voted=False).exists():
-            print("All players voted, sending WebSocket message")
+            # Отправляем сообщение через WebSocket
             channel_layer = get_channel_layer()
             async_to_sync(channel_layer.group_send)(
-                'players',
+                'players_group',
                 {
                     'type': 'all_voted',
                     'message': {'all_voted': True}
                 }
             )
-        else:
-            print("Not all players voted yet")
 
         return HttpResponse(status=204)
-
 
 @method_decorator(csrf_exempt, name='dispatch')
 class PromptAPIView(View):

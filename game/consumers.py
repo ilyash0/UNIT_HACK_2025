@@ -17,16 +17,7 @@ class PlayerConsumer(AsyncJsonWebsocketConsumer):
 
     async def player_joined(self, event):
         await self.send_json({'type': 'new_player', 'player': event['player']})
-<<<<<<< Updated upstream
-=======
 
-    async def all_answers_received(self, event):
-        url = event.get('url', '/game/vote/')
-        await self.send_json({
-            'type': 'redirect',
-            'url': url
-        })
-        
     async def all_voted(self, event):
-        await self.send_json({'all_voted': True})
->>>>>>> Stashed changes
+            message = event['message']
+            await self.send(text_data=json.dumps(message))
