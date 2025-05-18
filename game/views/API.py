@@ -31,13 +31,8 @@ class PlayerConnectAPIView(View):
     def post(self, request, *args, **kwargs):
         logging.debug(f"Raw request body: {request.body!r}")
 
-        content_type = request.META.get('CONTENT_TYPE', '')
-        if 'application/json' not in content_type:
-            logging.error(f"Unexpected Content-Type: {content_type}")
-            return HttpResponseBadRequest("Content-Type must be application/json")
-
         try:
-            data = loads(request.body.decode('utf-8'))
+            data = loads(request.POST.get('data', ''))
             tg_id = data['telegram_id']
             username = data.get('username', '')
         except JSONDecodeError:
