@@ -164,7 +164,7 @@ class PlayerAnswerAPIView(View):
             },
         }
 
-        return JsonResponse(result, status=204)
+        return JsonResponse(result)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
