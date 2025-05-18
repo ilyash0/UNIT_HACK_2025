@@ -94,6 +94,18 @@ class PlayerAnswerAPIView(View):
         player.answer = answer
         player.save()
 
+        total_players = Player.objects.count()
+        answered_players = Player.objects.filter(answer__isnull=False).count()
+
+        if answered_players >= total_players > 0:
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                'players',
+                {
+                    'type': 'all_answers_received',
+                }
+            )
+
         return HttpResponse(status=204)
 
     def get(self, request, *args, **kwargs):
