@@ -26,7 +26,7 @@
 **Smeshyavka:** [Сайт игры](https://unit-hack-2025.onrender.com/game/)<br>
 **!!!** Хостинг у сайта не стабильный и для того что бы войти на сайт иногда нужно подождать около 5 минут **!!!**
 
-**TBot:** [Телеграмм бот](@unit_hack_smexlist_bot)
+**TBot:** [Телеграмм бот](https://web.telegram.org/k/#@unit_hack_smexlist_bot)
 
 **GitHub с TBot** [GitHub с TBot](https://github.com/Asikul1415/UNIT_HACK_2025_Smechnyavka_TG_Bot)
 
