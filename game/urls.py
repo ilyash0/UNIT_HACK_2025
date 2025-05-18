@@ -33,7 +33,6 @@ urlpatterns = [
     path('api/prompt/', PromptAPIView.as_view()),
     path('api/count/', PlayerCountAPIView.as_view()),
     path('waiting/', WaitingPageView.as_view(), name='waiting'),
-    path('waiting/', WaitingPageView.as_view(), name='waiting'),
     path('vote/', VotePageView.as_view(), name='vote'),
     path('win/', WinPageView.as_view(), name='win'),
 ]
