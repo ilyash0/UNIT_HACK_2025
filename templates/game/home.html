@@ -11,11 +11,6 @@
             <h1 class="title">OЖИДАНИЕ ИГРOКOВ</h1>
 
             <div id="players-list" class="players-list" style="border: none; background-color: transparent;">
-                {% for player in players %}
-                    <div class="player-card">
-                        {{ player }}
-                    </div>
-                {% endfor %}
             </div>
 
             <div class="qr-container">
@@ -33,18 +28,54 @@
     <script>
         const list = document.getElementById('players-list');
         const socket = new WebSocket(
-            'ws://' + window.location.host + '/ws/players/'
+            (window.location.protocol === 'https:' ? 'wss://' : 'ws://')
+            + window.location.host
+            + '/ws/players/'
         );
+
+        socket.onopen = function () {
+            console.log('WebSocket соединение открыто');
+        };
 
         socket.onmessage = function (e) {
             const data = JSON.parse(e.data);
-            if (data.type === 'new_player') {
-                const div = document.createElement('div');
-                div.textContent = data.player.username;
-                div.dataset.id = data.player.id;
-                div.classList.add("player-card")
-                list.append(div);
+
+            if (data.type === 'init') {
+                list.innerHTML = '';
+                data.players.forEach(function(player) {
+                    const div = document.createElement('div');
+                    div.textContent = player.username;
+                    div.dataset.id = player.id;
+                    div.classList.add('player-card');
+                    list.append(div);
+                });
             }
+
+            if (data.type === 'new_player') {
+                const exists = list.querySelector(`.player-card[data-id="${data.player.id}"]`);
+                if (!exists) {
+                    const div = document.createElement('div');
+                    div.textContent = data.player.username;
+                    div.dataset.id = data.player.id;
+                    div.classList.add('player-card');
+                    list.append(div);
+                }
+            }
+
+            if (data.type === 'player_left') {
+                const toRemove = list.querySelector(`.player-card[data-id="${data.player.id}"]`);
+                if (toRemove) {
+                    toRemove.remove();
+                }
+            }
+        };
+
+        socket.onerror = function (error) {
+            console.error('WebSocket ошибка:', error);
+        };
+
+        socket.onclose = function (e) {
+            console.log('WebSocket закрыт, код:', e.code);
         };
     </script>
 {% endblock %}
