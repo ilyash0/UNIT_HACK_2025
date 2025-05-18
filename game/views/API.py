@@ -185,8 +185,6 @@ class PromptAPIView(View):
 class PlayerCountAPIView(View):
     def get(self, request, *args, **kwargs):
         players_count = Player.objects.count()
-        if players_count == 1:
-            return 1
         if players_count % 2 == 1:
             players_count += 1
         players_count /= 2
