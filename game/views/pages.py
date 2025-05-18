@@ -1,9 +1,10 @@
 from math import ceil
 
+from django.core.cache import cache
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
 
-from game.models import Prompt
+from game.models import Prompt, Player
 
 
 def get_players():
@@ -31,16 +32,18 @@ class WaitingPageView(TemplateView):
         context = super().get_context_data(**kwargs)
         players = get_players()
 
-        if len(players) < 4:
-            return redirect("game:home")
+        first_time = cache.add("prompts_assigned", True)
 
-        num_prompts = ceil(len(players) / 2)
-        prompts = Prompt.objects.order_by('?')[:num_prompts]
+        if first_time:
+            if len(players) < 4:
+                return redirect("game:home")
 
-        for i, player in enumerate(players):
-            prompt_index = i // 2
-            player.prompt = prompts[prompt_index]
-            player.save()
+            num_prompts = ceil(len(players) / 2)
+            prompts = Prompt.objects.order_by('?')[:num_prompts]
+
+            for i, player in enumerate(players):
+                player.prompt = prompts[i // 2]
+                player.save()
 
         context['players'] = players
         return context
@@ -60,41 +63,20 @@ class WinPageView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['players'] = get_players()
+        qs = Player.objects.order_by('-vote_count')
+
+        players = [
+            {
+                "username": player.username,
+                "vote_count": player.vote_count or 0
+            }
+            for player in qs
+        ]
+        context['players'] = players
         return context
-    
-"""
-Вьюшку для win`а с чатом накидал
-from django.views.generic import TemplateView
-from .models import Player  # ваша модель игрока
 
-class ResultsPageView(TemplateView):
-    template_name = 'game/results.html'
+    def post(self, request, *args, **kwargs):
+        Player.objects.all().delete()
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-
-        # Получаем всех игроков, сортируя по убыванию очков (votes, score и т.п.)
-        players = Player.objects.order_by('-score')  
-        if not players:
-            ctx['results'] = []
-            return ctx
-
-        max_score = players[0].score
-
-        # Формируем список c процентами ширины бара
-        results = []
-        for p in players:
-            pct = (p.score / max_score) * 100  # процент от максимума
-            results.append({
-                'username': p.username,
-                'score': p.score,
-                'percentage': pct,
-                'is_winner': p.score == max_score,
-            })
-
-        ctx['results'] = results
-        return ctx
-
-"""
-
+        cache.clear()
+        return redirect('game:home')

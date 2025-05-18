@@ -77,6 +77,8 @@ class PlayerConnectAPIView(View):
 @method_decorator(csrf_exempt, name='dispatch')
 class PlayerAnswerAPIView(View):
     CACHE_TIMEOUT = 5 * 60
+    TIMEOUT = 10 * 60
+    interval = 5
 
     def post(self, request, *args, **kwargs):
         """
@@ -132,19 +134,33 @@ class PlayerAnswerAPIView(View):
                     }
            }
         """
-        prompt_index = int(cache.get("prompt_index", "1"))
+        prompt_index = cache.get("prompt_index", None)
+        start_time = time()
+
+        while time() - start_time < self.TIMEOUT:
+            if prompt_index is None:
+                sleep(self.interval)
+                prompt_index = cache.get("prompt_index", None)
+            else:
+                break
+
+        if prompt_index is None:
+            return JsonResponse(
+                {"error": "No prompt_index found in cache within TIMEOUT."},
+                status=408
+            )
 
         players = Player.objects.order_by('prompt')[prompt_index - 1:2 * prompt_index]
 
         result = {
-            "prompt": players.first().prompt,
+            "prompt": players[0].prompt,
             "answer0": {
                 "telegram_id": players[0].telegram_id,
-                "answer": players[0].answer
+                "answer": players[0].answer,
             },
             "answer1": {
                 "telegram_id": players[1].telegram_id,
-                "answer": players[1].answer
+                "answer": players[1].answer,
             },
         }
 
