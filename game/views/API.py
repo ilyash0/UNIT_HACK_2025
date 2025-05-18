@@ -187,4 +187,5 @@ class PlayerCountAPIView(View):
         players_count = Player.objects.count()
         if players_count % 2 == 1:
             players_count += 1
+        players_count /= 2
         return JsonResponse(players_count)
