@@ -66,7 +66,7 @@ class VotePageView(TemplateView):
         players = Player.objects.order_by('prompt')
         context['prompt'] = players[0].prompt.phrase
         context['players'] = players
-        return contextКуь
+        return context
 
 
 class WinPageView(TemplateView):
