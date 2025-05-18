@@ -1,5 +1,6 @@
 from math import ceil
 
+from django.core.cache import cache
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
 
@@ -31,16 +32,18 @@ class WaitingPageView(TemplateView):
         context = super().get_context_data(**kwargs)
         players = get_players()
 
-        if len(players) < 4:
-            return redirect("game:home")
+        first_time = cache.add("prompts_assigned", True)
 
-        num_prompts = ceil(len(players) / 2)
-        prompts = Prompt.objects.order_by('?')[:num_prompts]
+        if first_time:
+            if len(players) < 4:
+                return redirect("game:home")
 
-        for i, player in enumerate(players):
-            prompt_index = i // 2
-            player.prompt = prompts[prompt_index]
-            player.save()
+            num_prompts = ceil(len(players) / 2)
+            prompts = Prompt.objects.order_by('?')[:num_prompts]
+
+            for i, player in enumerate(players):
+                player.prompt = prompts[i // 2]
+                player.save()
 
         context['players'] = players
         return context
@@ -62,7 +65,8 @@ class WinPageView(TemplateView):
         context = super().get_context_data(**kwargs)
         context['players'] = get_players()
         return context
-    
+
+
 """
 Вьюшку для win`а с чатом накидал
 from django.views.generic import TemplateView
@@ -97,4 +101,3 @@ class ResultsPageView(TemplateView):
         return ctx
 
 """
-
