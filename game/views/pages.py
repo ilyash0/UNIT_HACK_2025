@@ -4,7 +4,7 @@ from django.core.cache import cache
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
 
-from game.models import Prompt
+from game.models import Prompt, Player
 
 
 def get_players():
@@ -63,8 +63,23 @@ class WinPageView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['players'] = get_players()
+        qs = Player.objects.order_by('-vote_count')
+
+        players = [
+            {
+                "username": player.username,
+                "vote_count": player.vote_count or 0
+            }
+            for player in qs
+        ]
+        context['players'] = players
         return context
+
+    def post(self, request, *args, **kwargs):
+        Player.objects.all().delete()
+
+        cache.clear()
+        return redirect('game:home')
 
 
 """

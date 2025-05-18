@@ -5,52 +5,144 @@
 
 
 {% block content %}
-<div class="winning-container">
-    <div class="overlay"></div>
-    
-    <div class="content" style="display: block; text-align: center;">
-        <h1 class="title">YOU WIN!</h1>
-        
-        <div class="winner">
-            <div class="winner-name">
-                {% if players.0 %}
-                    {{ players.0.name|default:players.0 }}
-                {% else %}
-                    Игрок 1
-                {% endif %}
-            </div>
-            <div class="winner-score">
-                {% if players.0 %}
-                    {{ players.0.score|default:"13183" }}
-                {% else %}
-                    13183
-                {% endif %}
-            </div>
-        </div>
-        
-        <div class="players-list">
-            {% for player, position in players|slice:"1:"|add:"[None, None, None, None, None, None, None, None, None, None, None]"|slice:":11" %}
-                <div class="player-item">
-                    <span class="player-position">{{ forloop.counter|add:1 }}.</span>
-                    <span class="player-name{% if not player %} empty-slot{% endif %}">
-                        {% if player %}
-                            {{ player.name|default:player }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </span>
-                    <span class="player-score{% if not player %} empty-slot{% endif %}">
-                        {% if player %}
-                            {{ player.score|default:"0" }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </span>
+    <style>
+        .players-list {
+            display: block;
+            background-color: rgba(32, 32, 32, 0.7);
+            border: 2.4px solid #b4fc64; /* 2px * 1.2 */
+            border-radius: 9.6px; /* 8px * 1.2 */
+            padding: 9.6px; /* 8px * 1.2 */
+            margin-bottom: 14.4px; /* 12px * 1.2 */
+            max-height: 384px; /* 320px * 1.2 */
+            overflow-y: auto;
+        }
+
+        .player-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 7.2px 9.6px; /* 6px 8px * 1.2 */
+            border-bottom: 1.2px solid rgba(180, 252, 100, 0.3); /* 1px * 1.2 */
+            font-size: 16.8px; /* 14px * 1.2 */
+            color: #fff;
+            min-height: 36px; /* 30px * 1.2 */
+        }
+
+        .player-item:last-child {
+            border-bottom: none;
+        }
+
+        .player-position {
+            color: #ff9c45;
+            min-width: 26.4px; /* 22px * 1.2 */
+            text-align: right;
+        }
+
+        .player-name {
+            flex-grow: 1;
+            text-align: left;
+            padding: 0 9.6px; /* 8px * 1.2 */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .player-score {
+            color: #f64747;
+            min-width: 60px; /* 50px * 1.2 */
+            text-align: right;
+        }
+
+        .empty-slot {
+            color: rgba(255, 255, 255, 0.4);
+            font-style: italic;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.03);
+            }
+        }
+
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 18px rgba(107, 193, 8, 0.5);
+            }
+            /* 15px * 1.2 */
+            to {
+                box-shadow: 0 0 24px rgba(107, 193, 8, 0.7);
+            }
+            /* 20px * 1.2 */
+        }
+
+        .players-list::-webkit-scrollbar {
+            width: 4.8px; /* 4px * 1.2 */
+        }
+
+        .players-list::-webkit-scrollbar-track {
+            background: rgba(32, 32, 32, 0.3);
+            border-radius: 2.4px; /* 2px * 1.2 */
+        }
+
+        .players-list::-webkit-scrollbar-thumb {
+            background-color: #b4fc64;
+            border-radius: 2.4px; /* 2px * 1.2 */
+        }
+    </style>
+    <div class="winning-container">
+        <div class="overlay"></div>
+
+        <div class="content" style="display: block; text-align: center;">
+            <h1 class="title">YOU WIN!</h1>
+
+            <div class="winner">
+                <div class="winner-name">
+                    {% if players.0 %}
+                        {{ players.0.username|default:"Безымянный" }}
+                    {% else %}
+                        Игрок 1
+                    {% endif %}
                 </div>
-            {% endfor %}
+                <div class="winner-score">
+                    {% if players.0 %}
+                        {{ players.0.vote_count|default:"0" }}
+                    {% else %}
+                        13183
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="players-list">
+                {% for player in players|slice:"1:" %}
+                    <div class="player-item">
+                        <span class="player-position">{{ forloop.counter|add:1 }}.</span>
+                        <span class="player-name{% if not player %} empty-slot{% endif %}">
+                        {% if player %}
+                            {{ player.username|default:"Безымянный" }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </span>
+                        <span class="player-score{% if not player %} empty-slot{% endif %}">
+                        {% if player %}
+                            {{ player.vote_count|default:"0" }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </span>
+                    </div><br/>
+                {% endfor %}
+            </div>
+
+            <form method="post" action="" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="button">
+                    ВЕРНУТСЯ В ЛОББИ
+                </button>
+            </form>
         </div>
-        
-        <button class="button" onclick="document.location.replace('/game/')">ВЕРНУТЬСЯ В ЛOББИ</button>
     </div>
-</div>
 {% endblock %}
