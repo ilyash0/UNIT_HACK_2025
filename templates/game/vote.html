@@ -50,3 +50,31 @@
     </div>
 </div>
 {% endblock %}
+{% block script %}
+<script>
+    console.log('Script loaded'); // Тестовая проверка
+    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    const socket = new WebSocket(protocol + window.location.host + '/ws/players/');
+
+    socket.onopen = function() {
+        console.log('WebSocket connected');
+    };
+
+    socket.onmessage = function(event) {
+        console.log('WebSocket message received:', event.data);
+        const data = JSON.parse(event.data);
+        if (data.all_voted) {
+            console.log('All voted, redirecting to /win/');
+            window.location.href = '/win/';
+        }
+    };
+
+    socket.onerror = function(error) {
+        console.error('WebSocket error:', error);
+    };
+
+    socket.onclose = function(event) {
+        console.log('WebSocket closed:', event);
+    };
+</script>
+{% endblock %}

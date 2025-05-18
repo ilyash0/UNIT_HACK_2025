@@ -129,14 +129,6 @@ class VoteAPIView(View):
     CACHE_TIMEOUT = 60
 
     def post(self, request, *args, **kwargs):
-        """
-            API для голосования за лучший ответ.
-            Ожидает POST с JSON: {
-                "voter_id": int,         # идентификатор голосующего
-                "candidate_id": int      # идентификатор того, за кого голосуют
-            }
-            В ответ всегда отправляет "OK" или 400 при ошибке.
-        """
         try:
             data = request.json if hasattr(request, 'json') else loads(request.body)
             voter_id = int(data['voter_id'])
@@ -144,9 +136,39 @@ class VoteAPIView(View):
         except (ValueError, KeyError, TypeError):
             return HttpResponseBadRequest('Invalid JSON payload')
 
+<<<<<<< Updated upstream
         player = Player.objects.get(telegram_id=candidate_id)
         player.vote_count += 1
         player.save()
+=======
+        voter = Player.objects.get(telegram_id=voter_id)
+        if voter.is_voted:
+            return HttpResponseBadRequest('Already voted')
+
+        voter.is_voted = True
+        voter.save()
+
+        candidate = Player.objects.get(telegram_id=candidate_id)
+        candidate.vote_count += 1
+        candidate.save()
+>>>>>>> Stashed changes
+
+        print(f"After vote: {voter.username} voted, candidate {candidate.username} now has {candidate.vote_count} votes")
+        remaining = Player.objects.filter(is_voted=False).count()
+        print(f"Players yet to vote: {remaining}")
+
+        if not Player.objects.filter(is_voted=False).exists():
+            print("All players voted, sending WebSocket message")
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                'players',
+                {
+                    'type': 'all_voted',
+                    'message': {'all_voted': True}
+                }
+            )
+        else:
+            print("Not all players voted yet")
 
         return HttpResponse(status=204)
 
