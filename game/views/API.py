@@ -141,7 +141,7 @@ class PlayerAnswerAPIView(View):
             if prompt_index is None:
                 sleep(self.interval)
                 prompt_index = cache.get("prompt_index", None)
-                cache.set("prompt_index", prompt_index+1, timeout=300)
+                cache.set("prompt_index", prompt_index + 1, timeout=300)
             else:
                 break
 
@@ -184,6 +184,7 @@ class VoteAPIView(View):
         except (ValueError, KeyError, TypeError):
             return HttpResponseBadRequest('Invalid JSON payload')
 
+        prompt_index = cache.get("prompt_index", None)
         voter = Player.objects.get(telegram_id=voter_id)
         if voter.is_voted:
             return HttpResponseBadRequest('Already voted')
@@ -197,13 +198,33 @@ class VoteAPIView(View):
 
         # Проверяем, все ли игроки проголосовали
         if not Player.objects.filter(is_voted=False).exists():
+            for p in Player.objects.filter(is_voted=True):
+                p.is_voted = False
+
+            players = Player.objects.order_by('prompt')[prompt_index - 1:2 * prompt_index]
+
+            result = {
+                'all_voted': prompt_index == ceil(Player.objects.count() / 2),
+                "prompt": players[0].prompt,
+                "player0": {
+                    "username": players[0].username,
+                    "answer": players[0].answer,
+                    'vote_count': players[1].vote_count or 0,
+                },
+                "player1": {
+                    "username": players[1].username,
+                    "answer": players[1].answer,
+                    'vote_count': players[1].vote_count or 0,
+                },
+            }
+
             # Отправляем сообщение через WebSocket
             channel_layer = get_channel_layer()
             async_to_sync(channel_layer.group_send)(
-                'players_group',
+                'players',
                 {
                     'type': 'all_voted',
-                    'message': {'all_voted': True}
+                    'message': result,
                 }
             )
 
