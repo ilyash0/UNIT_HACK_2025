@@ -132,7 +132,7 @@ class PlayerAnswerAPIView(View):
                     }
            }
         """
-        prompt_index = cache.get("prompt_index")
+        prompt_index = int(cache.get("prompt_index", "1"))
 
         players = Player.objects.order_by('prompt')[prompt_index - 1:2 * prompt_index]
 
