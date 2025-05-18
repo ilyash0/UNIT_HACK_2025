@@ -1,7 +1,8 @@
+import logging
+from asyncio import sleep
 from json import loads
 from math import ceil
 from time import time
-from asyncio import sleep
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -33,6 +34,7 @@ class PlayerConnectAPIView(View):
             tg_id = data['telegram_id']
             username = data.get('username', '')
         except (ValueError, KeyError):
+            logging.log(1, 'Invalid data')
             return HttpResponseBadRequest('Invalid data')
 
         try:
@@ -44,12 +46,15 @@ class PlayerConnectAPIView(View):
         except IntegrityError:
             player = Player.objects.get(telegram_id=tg_id)
             created = False
+        logging.log(1, 'Got or created')
 
         if not created:
+            logging.log(1, 'Got')
             player.username = username
             player.joined_at = timezone.now()
             player.save()
 
+        logging.log(1, 'Saved')
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
             'players',
