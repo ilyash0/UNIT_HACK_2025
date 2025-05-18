@@ -23,8 +23,11 @@
 - Компании друзей для совместных игр.
 - Ведущих мероприятий для интерактива с аудиторией.
 
-**Smeshyavka:** [Сайт игры](https://unit-hack-2025.onrender.com/game/) 
+**Smeshyavka:** [Сайт игры](https://unit-hack-2025.onrender.com/game/)<br>
+**!!!** Хостинг у сайта не стабильный и для того что бы войти на сайт иногда нужно подождать около 5 минут **!!!**
 
-**TBot:** [Телеграмм бот](@unit_hack_smexlist_bot) 
+**TBot:** [Телеграмм бот](@unit_hack_smexlist_bot)
 
-**Кейс:** [Сайт с геймефикацией](https://unit-ekb.ru/kontur) от Контур
+**GitHub с TBot** [GitHub с TBot](https://github.com/Asikul1415/UNIT_HACK_2025_Smechnyavka_TG_Bot)
+
+**Кейс:** [Сайт с геймификацией](https://unit-ekb.ru/kontur) от Контур
