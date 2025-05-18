@@ -36,6 +36,7 @@ class WaitingPageView(TemplateView):
         for i, player in enumerate(players):
             prompt_index = i // 2
             player.prompt = prompts[prompt_index]
+            player.save()
 
         context['players'] = players
         return context
