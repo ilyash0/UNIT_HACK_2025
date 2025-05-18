@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Страница показа ответов игроков</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html { height: 100%; }
+
+    .grid {
+      display: grid;
+      width: 100%;
+      height: 100vh;
+      grid-template-columns: 250px 1fr 250px;
+      grid-template-rows: 120px auto 120px;
+      grid-template-areas:
+        "lt   center  rt"
+        "lm   center  rm"
+        "lb   center  rb";
+      gap: 10px;
+      padding: 10px;
+      background-color: #000;
+    }
+
+    /* Стили для боковых ячеек */
+    .lt, .rt {
+        font-size: 28px;
+        font-weight: bold;
+        color: #b4fc64;
+        text-shadow: 0 0 5px #b4fc64;
+        grid-area: lt;
+        letter-spacing: 1px;
+    }
+    
+    .rt {
+        grid-area: rt;
+    }
+
+    .lm, .rm {
+        padding: 15px;
+        font-size: 24px;
+        color: #b4fc64;
+        line-height: 1.3;
+        text-shadow: 0 0 3px #b4fc64;
+    }
+    
+    .lm {
+        grid-area: lm;
+    }
+    
+    .rm {
+        grid-area: rm;
+    }
+
+    .lb, .rb {
+        font-size: 36px;
+        color: #b4fc64;
+        text-shadow: 0 0 5px #b4fc64;
+    }
+    
+    .lb {
+        grid-area: lb;
+    }
+    
+    .rb {
+        grid-area: rb;
+    }
+
+    .center {
+        padding: 30px;
+        font-size: 32px;
+        color: #ffffff;
+        grid-area: center;
+        background-image: 
+            linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+            url('images/Matrix.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        text-shadow: 1px 1px 3px #000;
+        font-family: 'Pixelify Sans', sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        border: 2px solid #b4fc64;
+        box-shadow: 0 0 15px rgba(180, 252, 100, 0.3);
+    }
+
+    /* Общий стиль ячеек */
+    .cell {
+        border: 3px solid #b4fc64;
+        background: rgba(32, 32, 32, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Pixelify Sans', sans-serif;
+        box-shadow: 0 0 10px rgba(180, 252, 100, 0.2);
+        border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="grid">
+    <div class="cell lt"> 
+        Игрок1
+    </div>
+
+    <div class="cell lm">
+        Фу, тут мусором воняет!
+    </div>
+
+    <div class="cell lb">
+        #1
+    </div>
+
+    <div class="center">
+        Фраза, которую не стоит говорить, сидя в полицейской буханке_______
+    </div>
+
+    <div class="cell rt">
+        Игрок2
+    </div>
+
+    <div class="cell rm">
+        Мужики, а пописать можно выйти?
+    </div>
+
+    <div class="cell rb">
+        #2
+    </div>
+  </div>
+
+</body>
+</html>
