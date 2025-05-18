@@ -1,5 +1,6 @@
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
+
 from game.models import Player
 
 
@@ -17,3 +18,10 @@ class PlayerConsumer(AsyncJsonWebsocketConsumer):
 
     async def player_joined(self, event):
         await self.send_json({'type': 'new_player', 'player': event['player']})
+
+    async def all_answers_received(self, event):
+        url = event.get('url', '/game/vote/')
+        await self.send_json({
+            'type': 'redirect',
+            'url': url
+        })
