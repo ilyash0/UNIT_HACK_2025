@@ -169,7 +169,7 @@ class PromptAPIView(View):
     timeout = 10 * 60
     interval = 5
 
-    def get(self, request, *args, **kwargs):
+    async def get(self, request, *args, **kwargs):
         """
             GET /api/get_prompt/?telegram_id=<ID>
             На вход принимает user_id: int
@@ -182,20 +182,21 @@ class PromptAPIView(View):
         start_time = time()
 
         while time() - start_time < self.timeout:
-            player = Player.objects.get(telegram_id=telegram_id)
+            player = await Player.objects.aget(telegram_id=telegram_id)
             if player.prompt is not None:
                 return JsonResponse({
                     'telegram_id': telegram_id,
                     'prompt': player.prompt.phrase
                 })
 
-            sleep(self.interval)
+            await sleep(self.interval)
 
         return HttpResponse(status=408)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
 class PlayerCountAPIView(View):
-    def get(self, request, *args, **kwargs):
-        players_pairs_count = ceil(Player.objects.count() / 2)
+    async def get(self, request, *args, **kwargs):
+        count = await Player.objects.acount()
+        players_pairs_count = ceil(count / 2)
         return JsonResponse({'count': players_pairs_count})
