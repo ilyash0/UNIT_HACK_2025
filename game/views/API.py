@@ -192,4 +192,4 @@ class PromptAPIView(View):
 class PlayerCountAPIView(View):
     def get(self, request, *args, **kwargs):
         players_pairs_count = ceil(Player.objects.count() / 2)
-        return JsonResponse([players_pairs_count])
+        return JsonResponse({'count': players_pairs_count})
