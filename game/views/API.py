@@ -4,7 +4,7 @@ from json import loads, JSONDecodeError
 from math import ceil
 from time import time
 
-from asgiref.sync import async_to_sync
+from asgiref.sync import async_to_sync, sync_to_async
 from channels.layers import get_channel_layer
 from django.core.cache import cache
 from django.db import transaction, IntegrityError
@@ -207,7 +207,8 @@ class PromptAPIView(View):
 
         while time() - start_time < self.timeout:
             player = await Player.objects.aget(telegram_id=telegram_id)
-            if player.prompt is not None:
+            prompt = await sync_to_async(lambda: player.prompt)()
+            if prompt is not None:
                 return JsonResponse({
                     'telegram_id': telegram_id,
                     'prompt': player.prompt.phrase
