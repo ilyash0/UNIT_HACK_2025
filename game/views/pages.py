@@ -54,7 +54,6 @@ class WaitingPageView(TemplateView):
                 player.prompt = prompts[i // 2]
                 player.save()
 
-        cache.clear()
         cache.set(self.PROMPTS_FLAG_KEY, True, None)
 
 
