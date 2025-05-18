@@ -28,25 +28,33 @@ class HomePageView(TemplateView):
 
 class WaitingPageView(TemplateView):
     template_name = 'game/wait.html'
+    PROMPTS_FLAG_KEY = "prompts_assigned"
+    PROMPTS_LOCK_KEY = "prompts_assign_lock"
+    LOCK_TIMEOUT = 300
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        players = get_players()
-
-        with cache.lock("prompts_assigned", timeout=300):
-            with transaction.atomic():
-                if len(players) < 4:
-                    return redirect("game:home")
-
-                num_prompts = ceil(len(players) / 2)
-                prompts = Prompt.objects.order_by('?')[:num_prompts]
-
-                for i, player in enumerate(players):
-                    player.prompt = prompts[i // 2]
-                    player.save()
-
-        context['players'] = players
+        self.assign_prompts_once()
+        context['players'] = get_players()
         return context
+
+    def assign_prompts_once(self):
+        if cache.get(self.PROMPTS_FLAG_KEY):
+            return
+
+        players = get_players()
+        if len(players) < 4:
+            return
+
+        num_prompts = ceil(len(players) / 2)
+        prompts = list(Prompt.objects.order_by('?')[:num_prompts])
+
+        with transaction.atomic():
+            for i, player in enumerate(players):
+                player.prompt = prompts[i // 2]
+                player.save()
+
+        cache.set(self.PROMPTS_FLAG_KEY, True, None)
 
 
 class VotePageView(TemplateView):
