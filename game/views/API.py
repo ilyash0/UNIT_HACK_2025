@@ -1,16 +1,28 @@
 from json import loads
+from time import time, sleep
 
-from django.http import JsonResponse, HttpResponseBadRequest
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+from django.core.cache import cache
+from django.db import transaction, IntegrityError
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
 from django.utils import timezone
+from django.utils.decorators import method_decorator
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 
 from ..models import Player
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class PlayerConnectAPIView(View):
     """
     API для подключения (регистрации) игрока.
-    Ожидает POST-запрос с данными JSON: { 'telegram_id': int, 'username': str }
+    Ожидает POST-запрос с данными JSON: {
+        'telegram_id': int,
+        'username': str
+    }
+    В ответ всегда отправляет "OK" или 400 при ошибке.
     """
 
     def post(self, request, *args, **kwargs):
@@ -21,32 +33,159 @@ class PlayerConnectAPIView(View):
         except (ValueError, KeyError):
             return HttpResponseBadRequest('Invalid data')
 
-        player, created = Player.objects.get_or_create(
-            telegram_id=tg_id,
-            defaults={'username': username}
-        )
+        try:
+            with transaction.atomic():
+                player, created = Player.objects.get_or_create(
+                    telegram_id=tg_id,
+                    defaults={'username': username, 'prompt': None, 'answer': None, 'vote_count': None},
+                )
+        except IntegrityError:
+            player = Player.objects.get(telegram_id=tg_id)
+            created = False
+
         if not created:
             player.username = username
             player.joined_at = timezone.now()
             player.save()
 
-        return JsonResponse({
-            'id': player.id,
-            'telegram_id': player.telegram_id,
-            'username': player.username,
-            'joined_at': player.joined_at.isoformat(),
-            'created': created,
-        })
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            'players',
+            {
+                'type': 'player_joined',
+                'player': {
+                    'id': player.id,
+                    'username': player.username,
+                },
+            }
+        )
+
+        return HttpResponse(status=204)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class PlayerAnswerAPIView(View):
+    CACHE_TIMEOUT = 5 * 60
+
+    def post(self, request, *args, **kwargs):
+        """
+            API для приёма ответов пользователей и их кэширования.
+            Ожидает POST с JSON: {
+                "telegram_id": int>
+                "answer": "<str>"
+            }
+            В ответ всегда отправляет 202 или 400 при ошибке.
+        """
+        try:
+            data = request.json if hasattr(request, 'json') else loads(request.body)
+            user_id = data['user_id']
+            answer = data['answer']
+        except (ValueError, KeyError):
+            return HttpResponseBadRequest('Invalid JSON payload')
+
+        player = Player.objects.get(telegram_id=user_id)
+        player.answer = answer
+        player.save()
+
+        return HttpResponse(status=204)
 
     def get(self, request, *args, **kwargs):
-        players = Player.objects.order_by('joined_at')
-        data = [
-            {
-                'id': p.id,
-                'telegram_id': p.telegram_id,
-                'username': p.username,
-                'joined_at': p.joined_at.isoformat(),
+        """
+           В ответ отправляет JSON: {
+                "prompt": str,
+                "answer0":
+                    {
+                        "telegram_id": int,    # идентификатор пользователя
+                        "answer": str          # ответ
+                    },
+                "answer1":
+                    {
+                        "telegram_id": int,    # идентификатор пользователя
+                        "answer": str          # ответ
+                    }
+           }
+        """
+        prompt_index = cache.get("prompt_index")
+
+        players = Player.objects.order_by('prompt')[prompt_index - 1:2 * prompt_index]
+
+        result = {
+            "prompt": players.first().prompt,
+            "answer0": {
+                "telegram_id": players[0].telegram_id,
+                "answer": players[0].answer
+            },
+            "answer1": {
+                "telegram_id": players[1].telegram_id,
+                "answer": players[1].answer
+            },
+        }
+
+        return JsonResponse(result, status=204)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class VoteAPIView(View):
+    CACHE_TIMEOUT = 60
+
+    def post(self, request, *args, **kwargs):
+        """
+            API для голосования за лучший ответ.
+            Ожидает POST с JSON: {
+                "voter_id": int,         # идентификатор голосующего
+                "candidate_id": int      # идентификатор того, за кого голосуют
             }
-            for p in players
-        ]
-        return JsonResponse({'players': data})
+            В ответ всегда отправляет "OK" или 400 при ошибке.
+        """
+        try:
+            data = request.json if hasattr(request, 'json') else loads(request.body)
+            voter_id = int(data['voter_id'])
+            candidate_id = int(data['candidate_id'])
+        except (ValueError, KeyError, TypeError):
+            return HttpResponseBadRequest('Invalid JSON payload')
+
+        player = Player.objects.get(telegram_id=candidate_id)
+        player.vote_count += 1
+        player.save()
+
+        return HttpResponse(status=204)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class PromptAPIView(View):
+    timeout = 10 * 60
+    interval = 5
+
+    def get(self, request, *args, **kwargs):
+        """
+            GET /api/get_prompt/?telegram_id=<ID>
+            На вход принимает user_id: int
+            В ответ отправляет JSON: {
+                "telegram_id": int,         # идентификатор пользователя
+                "prompt": str      # фраза
+            }
+        """
+        telegram_id = request.GET.get('telegram_id')
+        start_time = time()
+
+        while time() - start_time < self.timeout:
+            player = Player.objects.get(telegram_id=telegram_id)
+            if player.prompt is not None:
+                return JsonResponse({
+                    'telegram_id': telegram_id,
+                    'prompt': player.prompt.phrase
+                })
+
+            sleep(self.interval)
+
+        return HttpResponse(status=408)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class PlayerCountAPIView(View):
+    def get(self, request, *args, **kwargs):
+        players_count = Player.objects.count()
+        if players_count % 2 == 1:
+            players_count += 1
+        players_count /= 2
+        return JsonResponse(players_count)
