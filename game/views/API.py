@@ -1,6 +1,7 @@
 from json import loads
 from math import ceil
-from time import time, sleep
+from time import time
+from asyncio import sleep
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
