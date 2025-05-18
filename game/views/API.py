@@ -29,10 +29,12 @@ class PlayerConnectAPIView(View):
     """
 
     def post(self, request, *args, **kwargs):
-        logging.debug(f"Raw request body: {request.body!r}")
-
         try:
-            data = loads(request.POST.get('data', ''))
+            if request.content_type == 'application/json':
+                data = loads(request.body)
+            else:
+                data = request.POST
+
             tg_id = data['telegram_id']
             username = data.get('username', '')
         except JSONDecodeError:
@@ -51,15 +53,12 @@ class PlayerConnectAPIView(View):
         except IntegrityError:
             player = Player.objects.get(telegram_id=tg_id)
             created = False
-        logging.log(1, 'Got or created')
 
         if not created:
-            logging.log(1, 'Got')
             player.username = username
             player.joined_at = timezone.now()
             player.save()
 
-        logging.log(1, 'Saved')
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
             'players',
