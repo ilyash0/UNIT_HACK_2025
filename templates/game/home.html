@@ -1,81 +1,36 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Игра{% endblock %}
+{% block title %}Ожидание игроков{% endblock %}
 
 {% block content %}
-  <style>
-    /* Заставляем контент растягиваться на всю высоту экрана */
-    .page-wrapper {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
-    /* Блок с заголовком и списком игроков растягивается на всё оставшееся место */
-    .players-list-container {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-    }
-    /* Футер-блок с кнопкой */
-    .footer {
-      text-align: center;
-      padding: 20px;
-    }
-    /* Простейший стиль для кнопки, если у вас его нет */
-    .button {
-      display: inline-block;
-      padding: 10px 20px;
-      background: #0066cc;
-      color: white;
-      text-decoration: none;
-      border-radius: 4px;
-    }
-    .button:hover {
-      background: #005bb5;
-    }
-  </style>
+    <div class="waiting-container">
+        <div class="overlay"></div>
 
-  <div class="page-wrapper">
-    <div class="players-list-container">
-      <h1>Игроки</h1>
-      <ul id="players">
-        {% for p in players %}
-          <li data-id="{{ p.id }}">{{ p.username }}</li>
-        {% endfor %}
-      </ul>
+        <div class="content">
+            <h1 class="title">OЖИДАНИЕ ИГРOКOВ</h1>
+
+            <div class="players-list" style="border: none; background-color: transparent;">
+                {% for player in players %}
+                    <div class="player-card">
+                        {% if player %}
+                            {{ player }}
+                        {% else %}
+                            Ожидание...
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="qr-container">
+                <img src="{% static qr_code_url %}" alt="QR-код для подключения">
+            </div>
+
+            <div class="loading">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
     </div>
-
-    <div class="footer">
-      <!-- Ссылка-кнопка ведёт на view WaitingPageView -->
-      <a href="" class="button">
-        Перейти к ожиданию
-      </a>
-    </div>
-  </div>
-
-  <script>
-    const list = document.getElementById('players');
-    const socket = new WebSocket(
-      'ws://' + window.location.host + '/ws/players/'
-    );
-
-    socket.onmessage = function (e) {
-      const data = JSON.parse(e.data);
-      if (data.type === 'new_player') {
-        const li = document.createElement('li');
-        li.textContent = data.player.username;
-        li.dataset.id = data.player.id;
-        list.append(li);
-      } else if (data.type === 'init') {
-        list.innerHTML = '';
-        data.players.forEach(p => {
-          const li = document.createElement('li');
-          li.textContent = p.username;
-          li.dataset.id = p.id;
-          list.append(li);
-        });
-      }
-    };
-  </script>
 {% endblock %}

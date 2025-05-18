@@ -1,24 +1,56 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Победа{% endblock %}
+{% block title %}Результаты игры{% endblock %}
+
 
 {% block content %}
-  <h1 style="text-align: center; margin-bottom: 40px;">
-    Победил — {{ results.0.username }}
-  </h1>
-
-  <div class="results-list">
-    {% for r in results %}
-      <div class="result-item {% if r.is_winner %}winner{% endif %}">
-        <div class="bar" style="width: {{ r.percentage }}%;">
-          <span>{{ r.username }} – {{ r.score }} {{ r.score|pluralize:"очко,очка,очков" }}</span>
+<div class="winning-container">
+    <div class="overlay"></div>
+    
+    <div class="content" style="display: block; text-align: center;">
+        <h1 class="title">YOU WIN!</h1>
+        
+        <div class="winner">
+            <div class="winner-name">
+                {% if players.0 %}
+                    {{ players.0.name|default:players.0 }}
+                {% else %}
+                    Игрок 1
+                {% endif %}
+            </div>
+            <div class="winner-score">
+                {% if players.0 %}
+                    {{ players.0.score|default:"13183" }}
+                {% else %}
+                    13183
+                {% endif %}
+            </div>
         </div>
-      </div>
-    {% endfor %}
-  </div>
-
-  <div class="button-group" style="text-align: center; margin-top: 40px;">
-    <a href="{% url 'game:vote' %}" class="button">Назад к голосованию</a>
-  </div>
+        
+        <div class="players-list">
+            {% for player, position in players|slice:"1:"|add:"[None, None, None, None, None, None, None, None, None, None, None]"|slice:":11" %}
+                <div class="player-item">
+                    <span class="player-position">{{ forloop.counter|add:1 }}.</span>
+                    <span class="player-name{% if not player %} empty-slot{% endif %}">
+                        {% if player %}
+                            {{ player.name|default:player }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </span>
+                    <span class="player-score{% if not player %} empty-slot{% endif %}">
+                        {% if player %}
+                            {{ player.score|default:"0" }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </span>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <button class="button" onclick="document.location.replace('/game/')">ВЕРНУТЬСЯ В ЛOББИ</button>
+    </div>
+</div>
 {% endblock %}

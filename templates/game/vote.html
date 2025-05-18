@@ -1,48 +1,52 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Голосование{% endblock %}
+{% block title %}Страница показа ответов игроков{% endblock %}
 
 {% block content %}
-  <div class="container lobby">
-    <!-- ЛЕВАЯ КОЛОНКА: Вариант A и список проголосовавших -->
-    <div class="left-column">
-      <h2>Вариант A</h2>
-      <ul class="lobby-list">
-        {% for p in votes_A %}
-          <li>{{ p.username }}</li>
-        {% empty %}
-          <li>Нет голосов</li>
-        {% endfor %}
-      </ul>
+<div class="grid">
+    <div class="cell lt">
+        {% if players.0 %}
+            {{ players.0 }}
+        {% else %}
+            Игрок1
+        {% endif %}
     </div>
 
-    <!-- ЦЕНТРАЛЬНАЯ КОЛОНКА: заголовок и кнопка голосования -->
-    <div class="center-column">
-      <h2>Голосование</h2>
-      <p>Выберите вариант и нажмите кнопку:</p>
-      <div class="button-group">
-        <form method="post">
-          {% csrf_token %}
-          <button type="submit" name="choice" value="A">Голос за A</button>
-          <button type="submit" name="choice" value="B">Голос за B</button>
-        </form>
-      </div>
-      <div class="button-group">
-        <a href="{% url 'game:win' %}" class="button">Посмотреть результаты</a>
-      </div>
+    <div class="cell lm">
+        {% if players.0 %}
+            Ответ игрока 1
+        {% else %}
+            Фу, тут мусором воняет!
+        {% endif %}
     </div>
 
-    <!-- ПРАВАЯ КОЛОНКА: Вариант B и список проголосовавших -->
-    <div class="right-column">
-      <h2>Вариант B</h2>
-      <ul class="lobby-list">
-        {% for p in votes_B %}
-          <li>{{ p.username }}</li>
-        {% empty %}
-          <li>Нет голосов</li>
-        {% endfor %}
-      </ul>
+    <div class="cell lb">
+        #1
     </div>
-  </div>
+
+    <div class="center">
+        Фраза, которую не стоит говорить, сидя в полицейской буханке_______
+    </div>
+
+    <div class="cell rt">
+        {% if players.1 %}
+            {{ players.1 }}
+        {% else %}
+            Игрок2
+        {% endif %}
+    </div>
+
+    <div class="cell rm">
+        {% if players.1 %}
+            Ответ игрока 2
+        {% else %}
+            Мужики, а пописать можно выйти?
+        {% endif %}
+    </div>
+
+    <div class="cell rb">
+        #2
+    </div>
+</div>
 {% endblock %}

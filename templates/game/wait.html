@@ -3,15 +3,19 @@
 
 {% block title %}Ожидание{% endblock %}
 
-{% block content %}
-    <div class="container">
-        <h1>Ожидаем ответов других игроков</h1>
-        <canvas id="matrix"></canvas>
-    </div>
-    <script src="{% static 'js/matrix.js' %}"></script>
-    <div class="button-group">
-  <!-- Вместо старой ссылки -->
-  <a href="{% url 'game:vote' %}" class="button">Перейти к голосованию</a>
-</div>
 
+{% block content %}
+<div class="waiting-container">
+    <canvas id="matrix"></canvas>
+    <div class="overlay"></div>
+    <div class="content">
+        <h1 class="title">Ожидаем ответов других игроков</h1>
+        <div class="hint">Проверьте свой телефон</div>
+        <div class="loading">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+    </div>
+</div>
 {% endblock %}
