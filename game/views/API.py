@@ -267,6 +267,6 @@ class PromptAPIView(View):
 class PlayerCountAPIView(View):
     async def get(self, request, *args, **kwargs):
         count = await Player.objects.acount()
-        prompt_index = await async_to_sync(cache.get)("prompt_index", 0)
+        prompt_index = await sync_to_async(cache.get)("prompt_index", 0)
         players_pairs_count = ceil(count / 2) - (prompt_index - 1)
         return JsonResponse({'count': players_pairs_count})
