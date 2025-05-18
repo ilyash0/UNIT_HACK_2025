@@ -10,8 +10,33 @@
     </div>
     <script src="{% static 'js/matrix.js' %}"></script>
     <div class="button-group">
-  <!-- Вместо старой ссылки -->
-  <a href="{% url 'game:vote' %}" class="button">Перейти к голосованию</a>
-</div>
+        <!-- Вместо старой ссылки -->
+        <a href="{% url 'game:vote' %}" class="button">Перейти к голосованию</a>
+    </div>
+
+    <script>
+        (function () {
+            const socket = new WebSocket(
+                (window.location.protocol === 'https:' ? 'wss://' : 'ws://')
+                + window.location.host
+                + '/ws/players/'
+            );
+
+            socket.onopen = function (e) {
+                console.log("WebSocket соединение открыто");
+            };
+            socket.onclose = function (e) {
+                console.log("WebSocket соединение закрыто");
+            };
+
+            socket.onmessage = function (e) {
+                let data = JSON.parse(e.data);
+                if (data.action === 'redirect') {
+                    window.location.href = data.url;
+                }
+            };
+        })();
+    </script>
+
 
 {% endblock %}
