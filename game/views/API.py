@@ -191,5 +191,5 @@ class PromptAPIView(View):
 @method_decorator(csrf_exempt, name='dispatch')
 class PlayerCountAPIView(View):
     def get(self, request, *args, **kwargs):
-        players_pairs_count = ceil(len(Player.objects.count()) / 2)
+        players_pairs_count = ceil(Player.objects.count() / 2)
         return JsonResponse([players_pairs_count])
