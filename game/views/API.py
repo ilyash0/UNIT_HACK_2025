@@ -59,17 +59,17 @@ class PlayerConnectAPIView(View):
             player.joined_at = timezone.now()
             player.save()
 
-        # channel_layer = get_channel_layer()
-        # async_to_sync(channel_layer.group_send)(
-        #     'players',
-        #     {
-        #         'type': 'player_joined',
-        #         'player': {
-        #             'id': player.id,
-        #             'username': player.username,
-        #         },
-        #     }
-        # )
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            'players',
+            {
+                'type': 'player_joined',
+                'player': {
+                    'id': player.id,
+                    'username': player.username,
+                },
+            }
+        )
 
         return HttpResponse(status=204)
 
