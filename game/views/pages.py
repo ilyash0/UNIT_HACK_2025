@@ -1,4 +1,8 @@
+from math import ceil
+
 from django.views.generic import TemplateView
+
+from game.models import Prompt
 
 
 def get_players():
@@ -23,7 +27,16 @@ class WaitingPageView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['players'] = get_players()
+        players = get_players()
+
+        num_prompts = ceil(len(players) / 2)
+        prompts = Prompt.objects.order_by('?')[:num_prompts]
+
+        for i, player in enumerate(players):
+            prompt_index = i // 2
+            player.prompt = prompts[prompt_index].id
+
+        context['players'] = players
         return context
 
 
