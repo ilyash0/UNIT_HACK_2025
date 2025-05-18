@@ -26,56 +26,88 @@
     </div>
 
     <script>
-        const list = document.getElementById('players-list');
-        const socket = new WebSocket(
-            (window.location.protocol === 'https:' ? 'wss://' : 'ws://')
-            + window.location.host
-            + '/ws/players/'
-        );
+    let playerCount = 0;
+    let timerId = null;
 
-        socket.onopen = function () {
-            console.log('WebSocket соединение открыто');
-        };
-
-        socket.onmessage = function (e) {
-            const data = JSON.parse(e.data);
-
-            if (data.type === 'init') {
-                list.innerHTML = '';
-                data.players.forEach(function(player) {
-                    const div = document.createElement('div');
-                    div.textContent = player.username;
-                    div.dataset.id = player.id;
-                    div.classList.add('player-card');
-                    list.append(div);
-                });
+    function startTimer() {
+        timerId = setTimeout(function() {
+            if (playerCount % 2 === 0) {
+                window.location.href = '/wait/';
+            } else {
+                startTimer();
             }
+        }, 10000);
+    }
 
-            if (data.type === 'new_player') {
-                const exists = list.querySelector(`.player-card[data-id="${data.player.id}"]`);
-                if (!exists) {
-                    const div = document.createElement('div');
-                    div.textContent = data.player.username;
-                    div.dataset.id = data.player.id;
-                    div.classList.add('player-card');
-                    list.append(div);
-                }
+    function updateTimer() {
+        if (playerCount >= 4) {
+            if (timerId === null) {
+                startTimer();
             }
-
-            if (data.type === 'player_left') {
-                const toRemove = list.querySelector(`.player-card[data-id="${data.player.id}"]`);
-                if (toRemove) {
-                    toRemove.remove();
-                }
+        } else {
+            if (timerId !== null) {
+                clearTimeout(timerId);
+                timerId = null;
             }
-        };
+        }
+    }
 
-        socket.onerror = function (error) {
-            console.error('WebSocket ошибка:', error);
-        };
+    const list = document.getElementById('players-list');
+    const socket = new WebSocket(
+        (window.location.protocol === 'https:' ? 'wss://' : 'ws://')
+        + window.location.host
+        + '/ws/players/'
+    );
 
-        socket.onclose = function (e) {
-            console.log('WebSocket закрыт, код:', e.code);
-        };
-    </script>
+    socket.onopen = function () {
+        console.log('WebSocket соединение открыто');
+    };
+
+    socket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+
+        if (data.type === 'init') {
+            list.innerHTML = '';
+            data.players.forEach(function(player) {
+                const div = document.createElement('div');
+                div.textContent = player.username;
+                div.dataset.id = player.id;
+                div.classList.add('player-card');
+                list.append(div);
+            });
+            playerCount = data.players.length;
+            updateTimer();
+        }
+
+        if (data.type === 'new_player') {
+            const exists = list.querySelector(`.player-card[data-id="${data.player.id}"]`);
+            if (!exists) {
+                const div = document.createElement('div');
+                div.textContent = data.player.username;
+                div.dataset.id = data.player.id;
+                div.classList.add('player-card');
+                list.append(div);
+                playerCount++;
+                updateTimer();
+            }
+        }
+
+        if (data.type === 'player_left') {
+            const toRemove = list.querySelector(`.player-card[data-id="${data.player.id}"]`);
+            if (toRemove) {
+                toRemove.remove();
+                playerCount--;
+                updateTimer();
+            }
+        }
+    };
+
+    socket.onerror = function (error) {
+        console.error('WebSocket ошибка:', error);
+    };
+
+    socket.onclose = function (e) {
+        console.log('WebSocket закрыт, код:', e.code);
+    };
+</script>
 {% endblock %}
