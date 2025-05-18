@@ -19,6 +19,9 @@ from django.urls import path, re_path
 from .consumers import PlayerConsumer
 from .views.API import PlayerConnectAPIView, PlayerAnswerAPIView, VoteAPIView, PromptAPIView, PlayerCountAPIView
 from .views.pages import HomePageView
+from .views.pages import WaitingPageView
+from .views.pages import VotePageView
+from .views.pages import WinPageView
 
 app_name = 'game'
 

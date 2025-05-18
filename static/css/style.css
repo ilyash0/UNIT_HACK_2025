@@ -1,156 +1,136 @@
+/* Общие стили для всего сайта */
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f0f0f0;
-    color: #333;
+    background-color: #000;
+    color: #0f0;
+    font-family: 'Courier New', Courier, monospace;
     margin: 0;
-    padding: 20px;
-}
-
-.container {
+    padding: 0;
+    height: 100vh;
     display: flex;
-    max-width: 1200px;
-    margin: 0 auto;
-    gap: 20px;
+    justify-content: center;
+    align-items: center;
 }
 
-.main-menu {
-    flex-direction: row;
-}
-
-.main-menu .left-column {
-    flex: 0 0 70%;
+/* Контейнер для центрирования содержимого */
+.container {
+    text-align: center;
+    max-width: 800px;
+    width: 100%;
     padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.main-menu .right-column {
-    flex: 0 0 30%;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+/* Заголовок */
+h1 {
+    font-size: 2em;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px #0f0;
 }
 
-.lobby {
-    flex-direction: row;
-}
-
-.lobby .left-column,
-.lobby .center-column,
-.lobby .right-column {
-    flex: 1;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.form-container {
-    max-width: 500px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-h1, h2 {
-    color: #007bff;
-}
-
-.highlight {
-    font-size: 1.5em;
-    margin: 10px 0;
-    font-weight: bold;
-}
-
-.lobby-list, .player-list {
+/* Список игроков */
+#players {
     list-style: none;
     padding: 0;
+    margin: 0 0 20px 0;
 }
 
-.lobby-list li, .player-list li {
+#players li {
+    font-size: 1.2em;
     padding: 10px;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #0f0;
+    transition: background-color 0.3s;
 }
 
-.lobby-list li:last-child, .player-list li:last-child {
-    border-bottom: none;
+#players li:hover {
+    background-color: #0f0;
+    color: #000;
 }
 
-.code-block {
-    background-color: #f8f9fa;
-    padding: 15px;
-    border-radius: 5px;
-    font-family: 'Courier New', monospace;
-    font-size: 0.9em;
-    overflow-x: auto;
-}
-
-button {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1em;
-    margin: 5px;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
-.game-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.form-group label {
-    margin-bottom: 5px;
-    font-weight: bold;
-}
-
-.form-group input {
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 1em;
-}
-
-.status {
-    text-align: center;
-    margin-top: 20px;
-}
-
-.ready-form {
+/* Кнопка для перехода */
+.button {
     display: inline-block;
+    padding: 10px 20px;
+    background-color: #0f0;
+    color: #000;
+    text-decoration: none;
+    border: 2px solid #0f0;
+    border-radius: 5px;
+    font-size: 1.1em;
+    transition: background-color 0.3s, color 0.3s;
 }
 
-.button-group {
-    text-align: center;
-    margin-top: 20px;
+.button:hover {
+    background-color: #000;
+    color: #0f0;
+    box-shadow: 0 0 10px #0f0;
 }
 
-@media (max-width: 768px) {
-    .container {
-        flex-direction: column;
+/* Canvas для анимации "Матрицы" */
+#matrix {
+    border: 1px solid #0f0;
+    max-width: 100%;
+    max-height: 400px;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 600px) {
+    h1 {
+        font-size: 1.5em;
     }
 
-    .main-menu .left-column,
-    .main-menu .right-column,
-    .lobby .left-column,
-    .lobby .center-column,
-    .lobby .right-column {
-        flex: 1;
+    .button {
+        padding: 8px 16px;
+        font-size: 1em;
     }
+
+    #players li {
+        font-size: 1em;
+        padding: 8px;
+    }
+}
+
+.container.lobby {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.left-column,
+.right-column {
+  flex: 0 0 25%;
+  max-width: 300px;
+}
+
+.center-column {
+  flex: 1;
+  margin: 0 20px;
+}
+
+.results-list {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.result-item {
+  margin-bottom: 15px;
+}
+
+.bar {
+  position: relative;
+  height: 40px;
+  background-color: #007bff;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.bar span {
+  position: absolute;
+  left: 10px;
+  top: 0;
+  line-height: 40px;
+  color: #fff;
+  font-weight: bold;
+}
+
+.winner .bar {
+  background-color: #28a745;  /* зелёный для победителя */
 }

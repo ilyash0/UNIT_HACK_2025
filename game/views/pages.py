@@ -8,7 +8,7 @@ def get_players():
 
 class HomePageView(TemplateView):
     """
-    Отображает главную страницу с визуалом и списком всех присоединившихся игроков.
+    Отображает главную страницу визуалом и списком всех присоединившихся игроков.
     """
     template_name = 'game/home.html'
 
@@ -43,3 +43,38 @@ class WinPageView(TemplateView):
         context = super().get_context_data(**kwargs)
         context['players'] = get_players()
         return context
+    
+"""
+from django.views.generic import TemplateView
+from .models import Player  # ваша модель игрока
+
+class ResultsPageView(TemplateView):
+    template_name = 'game/results.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+
+        # Получаем всех игроков, сортируя по убыванию очков (votes, score и т.п.)
+        players = Player.objects.order_by('-score')  
+        if not players:
+            ctx['results'] = []
+            return ctx
+
+        max_score = players[0].score
+
+        # Формируем список c процентами ширины бара
+        results = []
+        for p in players:
+            pct = (p.score / max_score) * 100  # процент от максимума
+            results.append({
+                'username': p.username,
+                'score': p.score,
+                'percentage': pct,
+                'is_winner': p.score == max_score,
+            })
+
+        ctx['results'] = results
+        return ctx
+
+"""
+

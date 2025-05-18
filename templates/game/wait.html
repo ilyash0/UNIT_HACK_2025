@@ -1,8 +1,17 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Игра{% endblock %}
+{% block title %}Ожидание{% endblock %}
 
 {% block content %}
-    <h1>Ожидание</h1>
+    <div class="container">
+        <h1>Ожидаем ответов других игроков</h1>
+        <canvas id="matrix"></canvas>
+    </div>
+    <script src="{% static 'js/matrix.js' %}"></script>
+    <div class="button-group">
+  <!-- Вместо старой ссылки -->
+  <a href="{% url 'game:vote' %}" class="button">Перейти к голосованию</a>
+</div>
+
 {% endblock %}

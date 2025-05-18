@@ -1,8 +1,48 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Игра{% endblock %}
+{% block title %}Голосование{% endblock %}
 
 {% block content %}
-    <h1>Голосвание</h1>
+  <div class="container lobby">
+    <!-- ЛЕВАЯ КОЛОНКА: Вариант A и список проголосовавших -->
+    <div class="left-column">
+      <h2>Вариант A</h2>
+      <ul class="lobby-list">
+        {% for p in votes_A %}
+          <li>{{ p.username }}</li>
+        {% empty %}
+          <li>Нет голосов</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- ЦЕНТРАЛЬНАЯ КОЛОНКА: заголовок и кнопка голосования -->
+    <div class="center-column">
+      <h2>Голосование</h2>
+      <p>Выберите вариант и нажмите кнопку:</p>
+      <div class="button-group">
+        <form method="post">
+          {% csrf_token %}
+          <button type="submit" name="choice" value="A">Голос за A</button>
+          <button type="submit" name="choice" value="B">Голос за B</button>
+        </form>
+      </div>
+      <div class="button-group">
+        <a href="{% url 'game:win' %}" class="button">Посмотреть результаты</a>
+      </div>
+    </div>
+
+    <!-- ПРАВАЯ КОЛОНКА: Вариант B и список проголосовавших -->
+    <div class="right-column">
+      <h2>Вариант B</h2>
+      <ul class="lobby-list">
+        {% for p in votes_B %}
+          <li>{{ p.username }}</li>
+        {% empty %}
+          <li>Нет голосов</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
 {% endblock %}
