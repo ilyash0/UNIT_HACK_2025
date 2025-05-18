@@ -12,23 +12,14 @@ def get_players():
 
 class HomePageView(TemplateView):
     """
-    Отображает страницу ожидания с списком игроков и QR-кодом
+    Отображает страницу ожидания со списком игроков и QR-кодом
     """
     template_name = 'game/home.html'  # Путь к вашему новому шаблону
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
-        # Получаем список активных игроков
-        active_players = get_players()
-        
-        # Создаем список из 12 элементов (10 игроков + 2 пустых слота)
-        players_list = list(active_players) + [None]*(12 - len(active_players))
-        
-        context.update({
-            'players': players_list,
-            'qr_code_url': 'images/qr.png'  # Путь к QR-коду
-        })
+        players = get_players()
+        context['players'] = players
         return context
 
 

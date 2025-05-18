@@ -13,17 +13,13 @@
             <div class="players-list" style="border: none; background-color: transparent;">
                 {% for player in players %}
                     <div class="player-card">
-                        {% if player %}
-                            {{ player }}
-                        {% else %}
-                            Ожидание...
-                        {% endif %}
+                        {{ player }}
                     </div>
                 {% endfor %}
             </div>
 
             <div class="qr-container">
-                <img src="{% static qr_code_url %}" alt="QR-код для подключения">
+                <img src="{% static 'images/qr.png' %}" alt="QR-код для подключения">
             </div>
 
             <div class="loading">
@@ -33,4 +29,22 @@
             </div>
         </div>
     </div>
+
+    <script>
+        const list = document.getElementById('players-list');
+        const socket = new WebSocket(
+            'ws://' + window.location.host + '/ws/players/'
+        );
+
+        socket.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            if (data.type === 'new_player') {
+                const div = document.createElement('div');
+                div.textContent = data.player.username;
+                div.dataset.id = data.player.id;
+                div.classList.add("player-card")
+                list.append(div);
+            }
+        };
+    </script>
 {% endblock %}
