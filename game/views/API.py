@@ -210,7 +210,7 @@ class VoteAPIView(View):
                 "player0": {
                     "username": players[0].username,
                     "answer": players[0].answer,
-                    'vote_count': players[1].vote_count or 0,
+                    'vote_count': players[0].vote_count or 0,
                 },
                 "player1": {
                     "username": players[1].username,
