@@ -156,14 +156,6 @@ class VoteAPIView(View):
     CACHE_TIMEOUT = 60
 
     def post(self, request, *args, **kwargs):
-        """
-            API для голосования за лучший ответ.
-            Ожидает POST с JSON: {
-                "voter_id": int,         # идентификатор голосующего
-                "candidate_id": int      # идентификатор того, за кого голосуют
-            }
-            В ответ всегда отправляет "OK" или 400 при ошибке.
-        """
         try:
             if request.content_type == 'application/json':
                 data = loads(request.body)
@@ -180,13 +172,28 @@ class VoteAPIView(View):
             return HttpResponseBadRequest('Already voted')
 
         voter.is_voted = True
+        voter.save()  # Сохраняем изменения
+
 
         candidate = Player.objects.get(telegram_id=candidate_id)
         candidate.vote_count += 1
         candidate.save()
 
-        return HttpResponse(status=204)
 
+        # Проверяем, все ли игроки проголосовали
+        if not Player.objects.filter(is_voted=False).exists():
+            # Отправляем сообщение через WebSocket
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                'players_group',
+                {
+                    'type': 'all_voted',
+                    'message': {'all_voted': True}
+                }
+            )
+
+
+        return HttpResponse(status=204)
 
 @method_decorator(csrf_exempt, name='dispatch')
 class PromptAPIView(View):

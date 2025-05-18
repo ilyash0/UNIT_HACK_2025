@@ -117,7 +117,7 @@
         #1
     </div>
 
-    <div class="center">
+    <div class="cell center">
         Фраза, которую не стоит говорить, сидя в полицейской буханке_______
     </div>
 
@@ -141,4 +141,21 @@
         #2
     </div>
 </div>
+{% endblock %}
+
+{% block script %}
+<script>
+    const socket = new WebSocket('ws://' + window.location.host + '/ws/players/');
+
+    socket.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        if (data.all_voted) {
+            window.location.href = '/win/';
+        }
+    };
+
+    socket.onerror = function(error) {
+        console.error('WebSocket error:', error);
+    };
+</script>
 {% endblock %}
