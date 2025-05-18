@@ -150,7 +150,7 @@ class PlayerAnswerAPIView(View):
                 status=408
             )
 
-        players = Player.objects.order_by('prompt')[2 * (prompt_index - 1):2 * prompt_index]
+        players = Player.objects.order_by('prompt_id')[2 * (prompt_index - 1):2 * prompt_index]
 
         result = {
             "prompt": players[0].prompt.phrase,
@@ -201,7 +201,7 @@ class VoteAPIView(View):
             for p in Player.objects.filter(is_voted=True):
                 p.is_voted = False
 
-            players = Player.objects.order_by('prompt')[prompt_index - 1:2 * prompt_index]
+            players = Player.objects.order_by('prompt_id')[prompt_index - 1:2 * prompt_index]
             cache.set("prompt_index", prompt_index + 1, timeout=300)
 
             result = {
