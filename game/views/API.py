@@ -89,7 +89,7 @@ class PlayerAnswerAPIView(View):
         """
         try:
             data = request.json if hasattr(request, 'json') else loads(request.body)
-            user_id = data['user_id']
+            user_id = data['telegram_id']
             answer = data['answer']
         except (ValueError, KeyError):
             return HttpResponseBadRequest('Invalid JSON payload')
