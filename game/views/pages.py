@@ -33,9 +33,7 @@ class WaitingPageView(TemplateView):
         context = super().get_context_data(**kwargs)
         players = get_players()
 
-        first_time = cache.add("prompts_assigned", True)
-
-        if first_time:
+        with cache.lock("prompts_assigned", timeout=300):
             with transaction.atomic():
                 if len(players) < 4:
                     return redirect("game:home")

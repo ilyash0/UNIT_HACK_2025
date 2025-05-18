@@ -153,7 +153,7 @@ class PlayerAnswerAPIView(View):
         players = Player.objects.order_by('prompt')[prompt_index - 1:2 * prompt_index]
 
         result = {
-            "prompt": players[0].prompt,
+            "prompt": players[0].prompt.phrase,
             "answer0": {
                 "telegram_id": players[0].telegram_id,
                 "answer": players[0].answer,
