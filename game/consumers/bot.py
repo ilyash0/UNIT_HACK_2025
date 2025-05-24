@@ -17,12 +17,12 @@ from game.serializers import RegisterPlayerInputSerializer, StatusOutputSerializ
 
 @sync_to_async
 def get_players(prompt_index):
-    return list(Player.objects.all().order_by('prompt')[2 * (prompt_index - 1):2 * prompt_index])
+    return list(Player.objects.select_related('prompt').all().order_by('prompt')[2 * (prompt_index - 1):2 * prompt_index])
 
 
 @sync_to_async
 def get_all_players():
-    return list(Player.objects.all())
+    return list(Player.objects.select_related('prompt').all())
 
 
 class BotConsumer(AsyncJsonWebsocketConsumer):
