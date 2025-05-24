@@ -47,6 +47,16 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard('players', self.channel_name)
 
+    async def receive_json(self, content, **kwargs):
+        action = content.get('type')
+        if action == 'register_player':
+            await self.register_player(content)
+        else:
+            await self.send_json({
+                'status': 'error',
+                'message': f"Unknown action '{action}'"
+            })
+
     @extend_ws_schema(
         request=RegisterPlayerInputSerializer,
         responses={200: RegisterPlayerOutputSerializer},
