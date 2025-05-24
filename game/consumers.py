@@ -22,15 +22,15 @@ class PlayerConsumer(AsyncJsonWebsocketConsumer):
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard('players', self.channel_name)
 
-    async def player_joined(self, event):
-        await self.send_json({'type': 'new_player', 'player': event['player']})
+    async def player_joined(self, content):
+        await self.send_json({'type': 'new_player', 'player': content['player']})
 
-    async def all_voted(self, event):
-        message = event['message']
+    async def all_voted(self, content):
+        message = content['message']
         await self.send(text_data=dumps(message))
 
-    async def all_answers_received(self, event):
-        url = event.get('url', '/game/vote/')
+    async def all_answers_received(self, content):
+        url = content.get('url', '/game/vote/')
         await self.send_json({
             'type': 'redirect',
             'url': url
@@ -61,7 +61,7 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
         request=RegisterPlayerInputSerializer,
         responses={200: RegisterPlayerOutputSerializer},
         type='send',
-        description='Регистрация игрока через WebSocket'
+        description='Регистрация игрока'
     )
     async def register_player(self, content):
         telegram_id = content.get('telegram_id')
