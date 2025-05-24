@@ -1,4 +1,5 @@
 from json import loads, JSONDecodeError
+from math import ceil
 
 from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
@@ -145,48 +146,46 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
         voter.is_voted = True
         await voter.asave()
 
-        candidate = Player.objects.get(telegram_id=candidate_id)
-        candidate.vote_count = 0 if candidate.vote_count is None else candidate.vote_count
-        candidate.vote_count += 1
+        candidate = await Player.objects.aget(telegram_id=candidate_id)
+        candidate.vote_count = (candidate.vote_count or 0) + 1
         await candidate.asave()
 
         channel_layer = get_channel_layer()
-        channel_layer.group_send('players', {'type': 'player_voted'})
+        await channel_layer.group_send('players', {'type': 'player_voted'})
 
-        # Проверяем, все ли игроки проголосовали
-        # if not Player.objects.filter(is_voted=False).count() == 2:
-        #     prompt_index = await sync_to_async(cache.get)("prompt_index", 0)
-        #
-        #     for p in Player.objects.filter(is_voted=True):
-        #         p.is_voted = False
-        #
-        #     players = await get_players(prompt_index)
-        #     cache.set("prompt_index", prompt_index + 1, timeout=300)
-        #
-        #     result = {
-        #         'all_voted': prompt_index == ceil(Player.objects.count() / 2),
-        #         "prompt": players[0].prompt.phrase,
-        #         "player0": {
-        #             "username": players[0].username,
-        #             "answer": players[0].answer,
-        #             'vote_count': players[0].vote_count or 0,
-        #         },
-        #         "player1": {
-        #             "username": players[1].username,
-        #             "answer": players[1].answer,
-        #             'vote_count': players[1].vote_count or 0,
-        #         },
-        #     }
-        #
-        #     # Отправляем сообщение через WebSocket
-        #     channel_layer = get_channel_layer()
-        #     async_to_sync(channel_layer.group_send)(
-        #         'players',
-        #         {
-        #             'type': 'all_voted',
-        #             'message': result,
-        #         }
-        #     )
+        remaining = await Player.objects.filter(is_voted=False).acount()
+        if remaining == 2:
+            prompt_index = await sync_to_async(cache.get)("prompt_index") or 0
+
+            async for p in Player.objects.filter(is_voted=True):
+                p.is_voted = False
+                await p.asave()
+
+            players = await get_players(prompt_index)
+            await sync_to_async(cache.set)("prompt_index", prompt_index + 1, timeout=300)
+
+            total_players = await Player.objects.acount()
+            is_all_voted = prompt_index == ceil(total_players / 2)
+
+            result = {
+                'all_voted': is_all_voted,
+                "prompt": players[0].prompt.phrase,
+                "player0": {
+                    "username": players[0].username,
+                    "answer": players[0].answer,
+                    "vote_count": players[0].vote_count or 0,
+                },
+                "player1": {
+                    "username": players[1].username,
+                    "answer": players[1].answer,
+                    "vote_count": players[1].vote_count or 0,
+                },
+            }
+
+            await channel_layer.group_send('players', {'type': 'all_voted', 'message': result})
+
+            if not is_all_voted:
+                await channel_layer.group_send('bot', {'type': 'receive_player_answers'})
 
         return await self.send_json({'type': 'send_player_vote', 'status': 'ok'})
 
