@@ -45,7 +45,7 @@ class WaitingPageView(TemplateView):
             return
 
         players = get_players()
-        if len(players) < 4:
+        if len(players) < 2:
             return
 
         cache.set(self.PROMPTS_FLAG_KEY, True, None)
