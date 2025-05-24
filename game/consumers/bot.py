@@ -31,7 +31,7 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
         await self.channel_layer.group_discard('players', self.channel_name)
 
     async def receive(self, text_data=None, bytes_data=None, **kwargs):
-        if not text_data:
+        if text_data is None:
             return
 
         try:
