@@ -1,5 +1,6 @@
 from json import loads, JSONDecodeError
 
+from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.layers import get_channel_layer
@@ -8,7 +9,13 @@ from drf_spectacular_websocket.decorators import extend_ws_schema
 
 from game.models import Player
 from game.serializers import RegisterPlayerInputSerializer, StatusOutputSerializer, \
-    SendPlayerAnswerInputSerializer, SendPlayerVoteInputSerializer, PlayerPromptOutputSerializer
+    SendPlayerAnswerInputSerializer, SendPlayerVoteInputSerializer, PlayerPromptOutputSerializer, \
+    PlayerAnswersOutputSerializer
+
+
+@sync_to_async
+def get_players(prompt_index):
+    return list(Player.objects.all().order_by('prompt')[2 * (prompt_index - 1):2 * prompt_index])
 
 
 class BotConsumer(AsyncJsonWebsocketConsumer):
@@ -188,3 +195,27 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
             'telegram_id': telegram_id,
             'prompt': player.prompt.phrase
         })
+
+    @extend_ws_schema(
+        responses={200: PlayerAnswersOutputSerializer},
+        type='receive',
+        description='Получение ответа игрока'
+    )
+    async def receive_player_answers(self, content):
+        prompt_index = content.get('prompt_index')
+
+        players = await get_players(prompt_index)
+
+        result = {
+            "prompt": players[0].prompt.phrase,
+            "answer0": {
+                "telegram_id": players[0].telegram_id,
+                "answer": players[0].answer,
+            },
+            "answer1": {
+                "telegram_id": players[1].telegram_id,
+                "answer": players[1].answer,
+            },
+        }
+
+        return await self.send_json(result)

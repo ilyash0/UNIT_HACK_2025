@@ -26,3 +26,15 @@ class StatusOutputSerializer(serializers.Serializer):
 class PlayerPromptOutputSerializer(serializers.Serializer):
     telegram_id = serializers.IntegerField()
     prompt = serializers.CharField()
+
+
+class PlayerAnswersOutputSerializer(serializers.Serializer):
+    prompt = serializers.CharField()
+    answer0 = serializers.DictField(
+        telegram_id=serializers.IntegerField(),
+        answer=serializers.CharField()
+    )
+    answer1 = serializers.DictField(
+        telegram_id=serializers.IntegerField(),
+        answer=serializers.CharField()
+    )
