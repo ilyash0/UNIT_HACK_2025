@@ -21,15 +21,8 @@ def get_players(prompt_index):
 
 
 @sync_to_async
-def get_all_players_prompts():
-    players = list(Player.objects.all())
-    result = []
-    for p in players:
-        result.append({
-            'telegram_id': p.telegram_id,
-            'prompt': p.prompt.phrase
-        })
-    return result
+def get_all_players():
+    return list(Player.objects.all())
 
 
 class BotConsumer(AsyncJsonWebsocketConsumer):
@@ -208,9 +201,16 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
     )
     async def receive_players_prompts(self, _content):
 
-        players = await get_all_players_prompts()
+        players = await get_all_players()
 
-        return await self.send_json({'type': 'receive_players_prompts', "players": players})
+        result = []
+        for p in players:
+            result.append({
+                'telegram_id': p.telegram_id,
+                'prompt': p.prompt.phrase
+            })
+
+        return await self.send_json({'type': 'receive_players_prompts', "players": result})
 
     @extend_ws_schema(
         responses={200: PlayerAnswersOutputSerializer},
