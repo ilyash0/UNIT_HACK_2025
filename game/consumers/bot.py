@@ -120,7 +120,7 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
         request=SendPlayerVoteInputSerializer,
         responses={200: StatusOutputSerializer},
         type='send',
-        description='Отправка ответа игрока'
+        description='Отправка голоса игрока'
     )
     async def send_player_vote(self, content):
         voter_id = content.get('voter_id')
