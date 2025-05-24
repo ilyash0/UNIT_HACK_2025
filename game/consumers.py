@@ -1,4 +1,4 @@
-from json import dumps
+from json import dumps, loads, JSONDecodeError
 
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
@@ -48,13 +48,15 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
         await self.channel_layer.group_discard('players', self.channel_name)
 
     async def receive_json(self, content, **kwargs):
-        action = content.get('type')
-        if action == 'register_player':
+        type = content.get('type')
+        if type == 'register_player':
             await self.register_player(content)
+        elif type == 'send_player_answer':
+            await self.send_player_answer(content)
         else:
             await self.send_json({
                 'status': 'error',
-                'message': f"Unknown action '{action}'"
+                'message': f"Unknown type '{type}'"
             })
 
     @extend_ws_schema(
@@ -79,7 +81,7 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
         if not created:
             player.username = username
             player.joined_at = timezone.now()
-            await database_sync_to_async(player.save)()
+            await player.asave()
 
         channel_layer = get_channel_layer()
         await channel_layer.group_send(
@@ -94,3 +96,32 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
         )
 
         await self.send_json({'status': 'ok'})
+
+    @extend_ws_schema(
+        request=RegisterPlayerInputSerializer,
+        responses={200: RegisterPlayerOutputSerializer},
+        type='send',
+        description='Регистрация игрока'
+    )
+    async def send_player_answer(self, content):
+        telegram_id = content.get('telegram_id')
+        answer = content.get('answer')
+
+        player = await Player.objects.aget(telegram_id=telegram_id)
+        player.answer = answer
+        await player.asave()
+
+        total_players = Player.objects.count()
+        answered_players = Player.objects.filter(answer__isnull=False).count()
+
+        if answered_players >= total_players > 0:
+            channel_layer = get_channel_layer()
+            channel_layer.group_send(
+                'players',
+                {
+                    'type': 'all_answers_received',
+                }
+            )
+
+        await self.send_json({'status': 'ok'})
+
