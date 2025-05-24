@@ -13,5 +13,11 @@ class SendPlayerAnswerInputSerializer(serializers.Serializer):
     answer = serializers.CharField(required=True, allow_blank=False)
 
 
+class SendPlayerVoteInputSerializer(serializers.Serializer):
+    type = serializers.CharField(default='send_player_vote', required=True, allow_blank=False)
+    voter_id = serializers.IntegerField(required=True)
+    candidate_id = serializers.IntegerField(required=True)
+
+
 class StatusOutputSerializer(serializers.Serializer):
     status = serializers.CharField()

@@ -8,7 +8,7 @@ from drf_spectacular_websocket.decorators import extend_ws_schema
 
 from game.models import Player
 from game.serializers import RegisterPlayerInputSerializer, StatusOutputSerializer, \
-    SendPlayerAnswerInputSerializer
+    SendPlayerAnswerInputSerializer, SendPlayerVoteInputSerializer
 
 
 class PlayerConsumer(AsyncJsonWebsocketConsumer):
@@ -140,5 +140,63 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
                     'type': 'all_answers_received',
                 }
             )
+
+        return await self.send_json({'status': 'ok'})
+
+    @extend_ws_schema(
+        request=SendPlayerVoteInputSerializer,
+        responses={200: StatusOutputSerializer},
+        type='send',
+        description='Отправка ответа игрока'
+    )
+    async def send_player_vote(self, content):
+        voter_id = content.get('voter_id')
+        candidate_id = content.get('candidate_id')
+
+        # prompt_index = cache.get("prompt_index")
+        voter = await Player.objects.aget(telegram_id=voter_id)
+        if voter.is_voted:
+            return await self.send_json({'status': 'Already voted'})
+
+        voter.is_voted = True
+        await voter.asave()  # Сохраняем изменения
+
+        candidate = Player.objects.get(telegram_id=candidate_id)
+        candidate.vote_count = 0 if candidate.vote_count is None else candidate.vote_count
+        candidate.vote_count += 1
+        await candidate.asave()
+
+        # Проверяем, все ли игроки проголосовали
+        # if not Player.objects.filter(is_voted=False).exists():
+        #     for p in Player.objects.filter(is_voted=True):
+        #         p.is_voted = False
+        #
+        #     players = Player.objects.all().order_by('prompt')[prompt_index - 1:2 * prompt_index]
+        #     cache.set("prompt_index", prompt_index + 1, timeout=300)
+        #
+        #     result = {
+        #         'all_voted': prompt_index == ceil(Player.objects.count() / 2),
+        #         "prompt": players[0].prompt.phrase,
+        #         "player0": {
+        #             "username": players[0].username,
+        #             "answer": players[0].answer,
+        #             'vote_count': players[0].vote_count or 0,
+        #         },
+        #         "player1": {
+        #             "username": players[1].username,
+        #             "answer": players[1].answer,
+        #             'vote_count': players[1].vote_count or 0,
+        #         },
+        #     }
+        #
+        #     # Отправляем сообщение через WebSocket
+        #     channel_layer = get_channel_layer()
+        #     async_to_sync(channel_layer.group_send)(
+        #         'players',
+        #         {
+        #             'type': 'all_voted',
+        #             'message': result,
+        #         }
+        #     )
 
         return await self.send_json({'status': 'ok'})
