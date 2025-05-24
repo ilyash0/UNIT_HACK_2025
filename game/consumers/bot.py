@@ -15,12 +15,12 @@ from game.serializers import RegisterPlayerInputSerializer, StatusOutputSerializ
     PlayerAnswersOutputSerializer
 
 
-@database_sync_to_async
+@sync_to_async
 def get_players(prompt_index):
     return list(Player.objects.all().order_by('prompt')[2 * (prompt_index - 1):2 * prompt_index])
 
 
-@database_sync_to_async
+@sync_to_async
 def get_all_players():
     return list(Player.objects.all())
 
