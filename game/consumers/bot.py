@@ -20,6 +20,11 @@ def get_players(prompt_index):
     return list(Player.objects.all().order_by('prompt')[2 * (prompt_index - 1):2 * prompt_index])
 
 
+@sync_to_async
+def get_all_players():
+    return list(Player.objects.all())
+
+
 class BotConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         await self.channel_layer.group_add('bot', self.channel_name)
@@ -196,7 +201,7 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
     )
     async def receive_players_prompts(self, _content):
 
-        players = await sync_to_async(Player.objects.all)()
+        players = await get_all_players()
 
         result = [{
             'telegram_id': p.telegram_id,
