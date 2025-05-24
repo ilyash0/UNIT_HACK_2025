@@ -51,8 +51,8 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
             await self.send_player_answer(content)
         elif type == 'send_player_vote':
             await self.send_player_vote(content)
-        elif type == 'receive_player_prompt':
-            await self.receive_player_prompt(content)
+        elif type == 'receive_players_prompts':
+            await self.receive_players_prompts(content)
         elif type == 'receive_player_answers':
             await self.receive_player_answers(content)
         else:
@@ -186,19 +186,20 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
         return await self.send_json({'status': 'ok'})
 
     @extend_ws_schema(
-        responses={200: PlayerPromptOutputSerializer},
+        responses={200: PlayersPromptsOutputSerializer},
         type='receive',
         description='Получение фразы игрока'
     )
-    async def receive_player_prompt(self, content):
-        telegram_id = content.get('telegram_id')
+    async def receive_players_prompts(self, _content):
 
-        player = await Player.objects.aget(telegram_id=telegram_id)
+        players = await sync_to_async(Player.objects.all)()
 
-        return await self.send_json({
-            'telegram_id': telegram_id,
-            'prompt': player.prompt.phrase
-        })
+        result = [{
+            'telegram_id': p.telegram_id,
+            'prompt': p.prompt.phrase
+        } for p in players]
+
+        return await self.send_json({"players": result})
 
     @extend_ws_schema(
         responses={200: PlayerAnswersOutputSerializer},

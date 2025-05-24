@@ -58,14 +58,7 @@ class WaitingPageView(TemplateView):
                 player.save()
 
         channel_layer = get_channel_layer()
-        for player in players:
-            async_to_sync(channel_layer.group_send)(
-                'bot',
-                {
-                    'type': 'receive_player_prompt',
-                    'telegram_id': player.telegram_id,
-                }
-            )
+        async_to_sync(channel_layer.group_send)('bot', {'type': 'receive_players_prompts'})
 
 
 class VotePageView(TemplateView):

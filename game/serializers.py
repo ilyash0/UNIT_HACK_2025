@@ -23,9 +23,13 @@ class StatusOutputSerializer(serializers.Serializer):
     status = serializers.CharField()
 
 
-class PlayerPromptOutputSerializer(serializers.Serializer):
+class PlayerSerializer(serializers.Serializer):
     telegram_id = serializers.IntegerField()
     prompt = serializers.CharField()
+
+
+class PlayersPromptsOutputSerializer(serializers.Serializer):
+    players = PlayerSerializer(many=True)
 
 
 class AnswerSerializer(serializers.Serializer):
