@@ -21,3 +21,8 @@ class SendPlayerVoteInputSerializer(serializers.Serializer):
 
 class StatusOutputSerializer(serializers.Serializer):
     status = serializers.CharField()
+
+
+class PlayerPromptOutputSerializer(serializers.Serializer):
+    telegram_id = serializers.IntegerField()
+    prompt = serializers.CharField()

@@ -8,7 +8,7 @@ from drf_spectacular_websocket.decorators import extend_ws_schema
 
 from game.models import Player
 from game.serializers import RegisterPlayerInputSerializer, StatusOutputSerializer, \
-    SendPlayerAnswerInputSerializer, SendPlayerVoteInputSerializer
+    SendPlayerAnswerInputSerializer, SendPlayerVoteInputSerializer, PlayerPromptOutputSerializer
 
 
 class BotConsumer(AsyncJsonWebsocketConsumer):
@@ -173,3 +173,18 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
         #     )
 
         return await self.send_json({'status': 'ok'})
+
+    @extend_ws_schema(
+        responses={200: PlayerPromptOutputSerializer},
+        type='receive',
+        description='Получение фразы игрока'
+    )
+    async def receive_player_prompt(self, content):
+        telegram_id = content.get('telegram_id')
+
+        player = await Player.objects.aget(telegram_id=telegram_id)
+
+        return await self.send_json({
+            'telegram_id': telegram_id,
+            'prompt': player.prompt.phrase
+        })
