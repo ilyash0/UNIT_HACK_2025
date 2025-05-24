@@ -7,7 +7,8 @@ from django.utils import timezone
 from drf_spectacular_websocket.decorators import extend_ws_schema
 
 from game.models import Player
-from game.serializers import RegisterPlayerInputSerializer, RegisterPlayerOutputSerializer
+from game.serializers import RegisterPlayerInputSerializer, StatusOutputSerializer, \
+    SendPlayerAnswerInputSerializer
 
 
 class PlayerConsumer(AsyncJsonWebsocketConsumer):
@@ -76,7 +77,7 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
 
     @extend_ws_schema(
         request=RegisterPlayerInputSerializer,
-        responses={200: RegisterPlayerOutputSerializer},
+        responses={200: StatusOutputSerializer},
         type='send',
         description='Регистрация игрока'
     )
@@ -113,10 +114,10 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
         await self.send_json({'status': 'ok'})
 
     @extend_ws_schema(
-        request=RegisterPlayerInputSerializer,
-        responses={200: RegisterPlayerOutputSerializer},
+        request=SendPlayerAnswerInputSerializer,
+        responses={200: StatusOutputSerializer},
         type='send',
-        description='Регистрация игрока'
+        description='Отправка ответа игрока'
     )
     async def send_player_answer(self, content):
         telegram_id = content.get('telegram_id')
@@ -126,8 +127,8 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
         player.answer = answer
         await player.asave()
 
-        total_players = Player.objects.count()
-        answered_players = Player.objects.filter(answer__isnull=False).count()
+        total_players = await Player.objects.acount()
+        answered_players = await Player.objects.filter(answer__isnull=False).acount()
 
         if answered_players >= total_players > 0:
             channel_layer = get_channel_layer()
