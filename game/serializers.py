@@ -30,11 +30,11 @@ class PlayerSerializer(serializers.Serializer):
 
 
 class PlayersPromptsOutputSerializer(serializers.Serializer):
+    type = serializers.CharField()
     players = PlayerSerializer(many=True)
 
 
 class AnswerSerializer(serializers.Serializer):
-    type = serializers.CharField()
     telegram_id = serializers.IntegerField()
     answer = serializers.CharField()
 
@@ -44,3 +44,7 @@ class PlayerAnswersOutputSerializer(serializers.Serializer):
     prompt = serializers.CharField()
     answer0 = AnswerSerializer()
     answer1 = AnswerSerializer()
+
+
+class PlayerCountSerializer(serializers.Serializer):
+    count = serializers.IntegerField()
