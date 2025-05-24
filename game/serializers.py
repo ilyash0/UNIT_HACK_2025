@@ -20,6 +20,7 @@ class SendPlayerVoteInputSerializer(serializers.Serializer):
 
 
 class StatusOutputSerializer(serializers.Serializer):
+    type = serializers.CharField()
     status = serializers.CharField()
 
 
