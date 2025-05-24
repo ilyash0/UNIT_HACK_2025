@@ -132,7 +132,7 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
 
         if answered_players >= total_players > 0:
             channel_layer = get_channel_layer()
-            channel_layer.group_send(
+            await channel_layer.group_send(
                 'players',
                 {
                     'type': 'all_answers_received',
