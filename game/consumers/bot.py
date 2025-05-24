@@ -203,10 +203,12 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
 
         players = await get_all_players()
 
-        result = [{
-            'telegram_id': p.telegram_id,
-            'prompt': p.prompt.phrase
-        } for p in players]
+        result = []
+        for p in players:
+            result.append({
+                'telegram_id': p.telegram_id,
+                'prompt': p.prompt.phrase
+            })
 
         return await self.send_json({'type': 'receive_players_prompts', "players": result})
 
