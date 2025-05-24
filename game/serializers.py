@@ -30,7 +30,7 @@ class PlayerSerializer(serializers.Serializer):
 
 
 class PlayersPromptsOutputSerializer(serializers.Serializer):
-    type = serializers.CharField()
+    type = serializers.CharField(default='receive_players_prompts', allow_blank=False)
     players = PlayerSerializer(many=True)
 
 
@@ -40,7 +40,7 @@ class AnswerSerializer(serializers.Serializer):
 
 
 class PlayerAnswersOutputSerializer(serializers.Serializer):
-    type = serializers.CharField()
+    type = serializers.CharField(default='receive_player_answers', allow_blank=False)
     prompt = serializers.CharField()
     answer0 = AnswerSerializer()
     answer1 = AnswerSerializer()
