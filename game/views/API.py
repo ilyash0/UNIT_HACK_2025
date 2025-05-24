@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.views import APIView
 
 from ..models import Player
 
@@ -264,7 +265,7 @@ class PromptAPIView(View):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class PlayerCountAPIView(View):
+class PlayerCountAPIView(APIView):
     async def get(self, request, *args, **kwargs):
         count = await Player.objects.acount()
         prompt_index = await sync_to_async(cache.get)("prompt_index", 0)

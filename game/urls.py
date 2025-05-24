@@ -27,10 +27,6 @@ app_name = 'game'
 
 urlpatterns = [
     path('', HomePageView.as_view(), name='home'),
-    path('api/connect/', PlayerConnectAPIView.as_view()),
-    path('api/answer/', PlayerAnswerAPIView.as_view()),
-    path('api/vote/', VoteAPIView.as_view()),
-    path('api/prompt/', PromptAPIView.as_view()),
     path('api/count/', PlayerCountAPIView.as_view()),
     path('waiting/', WaitingPageView.as_view(), name='waiting'),
     path('vote/', VotePageView.as_view(), name='vote'),
