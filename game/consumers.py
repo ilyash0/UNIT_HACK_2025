@@ -47,6 +47,21 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard('players', self.channel_name)
 
+    async def receive(self, text_data=None, bytes_data=None, **kwargs):
+        if not text_data:
+            return
+
+        try:
+            content = loads(text_data)
+        except JSONDecodeError:
+            await self.send_json({
+                'status': 'error',
+                'message': 'Invalid JSON format'
+            })
+            return
+
+        await self.receive_json(content)
+
     async def receive_json(self, content, **kwargs):
         type = content.get('type')
         if type == 'register_player':
@@ -124,4 +139,3 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
             )
 
         await self.send_json({'status': 'ok'})
-
