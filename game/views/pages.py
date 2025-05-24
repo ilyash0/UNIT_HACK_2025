@@ -1,5 +1,7 @@
 from math import ceil
 
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.core.cache import cache
 from django.db import transaction
 from django.shortcuts import redirect
@@ -46,6 +48,7 @@ class WaitingPageView(TemplateView):
         if len(players) < 4:
             return
 
+        cache.set(self.PROMPTS_FLAG_KEY, True, None)
         num_prompts = ceil(len(players) / 2)
         prompts = list(Prompt.objects.order_by('?')[:num_prompts])
 
@@ -54,7 +57,15 @@ class WaitingPageView(TemplateView):
                 player.prompt = prompts[i // 2]
                 player.save()
 
-        cache.set(self.PROMPTS_FLAG_KEY, True, None)
+        channel_layer = get_channel_layer()
+        for player in players:
+            async_to_sync(channel_layer.group_send)(
+                'bot',
+                {
+                    'type': 'receive_player_prompt',
+                    'telegram_id': player.telegram_id,
+                }
+            )
 
 
 class VotePageView(TemplateView):
