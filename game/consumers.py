@@ -69,6 +69,8 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
             await self.register_player(content)
         elif type == 'send_player_answer':
             await self.send_player_answer(content)
+        elif type == 'send_player_vote':
+            await self.send_player_vote(content)
         else:
             await self.send_json({
                 'status': 'error',
@@ -111,7 +113,7 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
             }
         )
 
-        await self.send_json({'status': 'ok'})
+        return await self.send_json({'status': 'ok'})
 
     @extend_ws_schema(
         request=SendPlayerAnswerInputSerializer,
@@ -139,4 +141,4 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
                 }
             )
 
-        await self.send_json({'status': 'ok'})
+        return await self.send_json({'status': 'ok'})
