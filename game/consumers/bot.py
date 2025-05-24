@@ -4,12 +4,13 @@ from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.layers import get_channel_layer
+from django.core.cache import cache
 from django.utils import timezone
 from drf_spectacular_websocket.decorators import extend_ws_schema
 
 from game.models import Player
 from game.serializers import RegisterPlayerInputSerializer, StatusOutputSerializer, \
-    SendPlayerAnswerInputSerializer, SendPlayerVoteInputSerializer, PlayerPromptOutputSerializer, \
+    SendPlayerAnswerInputSerializer, SendPlayerVoteInputSerializer, PlayersPromptsOutputSerializer, \
     PlayerAnswersOutputSerializer
 
 
@@ -137,25 +138,29 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
         voter_id = content.get('voter_id')
         candidate_id = content.get('candidate_id')
 
-        # prompt_index = cache.get("prompt_index")
         voter = await Player.objects.aget(telegram_id=voter_id)
         if voter.is_voted:
             return await self.send_json({'status': 'Already voted'})
 
         voter.is_voted = True
-        await voter.asave()  # Сохраняем изменения
+        await voter.asave()
 
         candidate = Player.objects.get(telegram_id=candidate_id)
         candidate.vote_count = 0 if candidate.vote_count is None else candidate.vote_count
         candidate.vote_count += 1
         await candidate.asave()
 
+        channel_layer = get_channel_layer()
+        channel_layer.group_send('players', {'type': 'player_voted'})
+
         # Проверяем, все ли игроки проголосовали
-        # if not Player.objects.filter(is_voted=False).exists():
+        # if not Player.objects.filter(is_voted=False).count() == 2:
+        #     prompt_index = await sync_to_async(cache.get)("prompt_index", 0)
+        #
         #     for p in Player.objects.filter(is_voted=True):
         #         p.is_voted = False
         #
-        #     players = Player.objects.all().order_by('prompt')[prompt_index - 1:2 * prompt_index]
+        #     players = await get_players(prompt_index)
         #     cache.set("prompt_index", prompt_index + 1, timeout=300)
         #
         #     result = {
@@ -206,8 +211,8 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
         type='receive',
         description='Получение ответа игрока'
     )
-    async def receive_player_answers(self, content):
-        prompt_index = content.get('prompt_index')
+    async def receive_player_answers(self, _content):
+        prompt_index = await sync_to_async(cache.get)("prompt_index", 0)
 
         players = await get_players(prompt_index)
 

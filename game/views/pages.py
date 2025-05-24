@@ -70,6 +70,9 @@ class VotePageView(TemplateView):
         players = Player.objects.all().order_by('prompt')
         context['prompt'] = players[0].prompt.phrase
         context['players'] = players
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)('bot', {'type': 'receive_player_answers'})
+
         return context
 
 

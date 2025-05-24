@@ -21,6 +21,9 @@ class PlayerConsumer(AsyncJsonWebsocketConsumer):
     async def player_joined(self, content):
         await self.send_json({'type': 'new_player', 'player': content['player']})
 
+    async def player_voted(self, content):
+        ...
+
     async def all_voted(self, content):
         message = content['message']
         await self.send(text_data=dumps(message))
