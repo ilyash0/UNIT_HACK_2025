@@ -51,6 +51,10 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
             await self.send_player_answer(content)
         elif type == 'send_player_vote':
             await self.send_player_vote(content)
+        elif type == 'receive_player_prompt':
+            await self.receive_player_prompt(content)
+        elif type == 'receive_player_answers':
+            await self.receive_player_answers(content)
         else:
             await self.send_json({
                 'status': 'error',
