@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.urls import path, re_path
 
-from .consumers import PlayerConsumer
+from .consumers import PlayerConsumer, BotConsumer
 from .views.API import PlayerConnectAPIView, PlayerAnswerAPIView, VoteAPIView, PromptAPIView, PlayerCountAPIView
 from .views.pages import HomePageView
 from .views.pages import WaitingPageView
@@ -39,4 +39,5 @@ urlpatterns = [
 
 websocket_urlpatterns = [
     re_path(r'ws/players/$', PlayerConsumer.as_asgi()),
+    re_path(r'ws/bot/$', BotConsumer.as_asgi()),
 ]

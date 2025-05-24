@@ -2,8 +2,12 @@ from json import dumps
 
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
+from channels.layers import get_channel_layer
+from django.utils import timezone
+from drf_spectacular_websocket.decorators import extend_ws_schema
 
 from game.models import Player
+from game.serializers import RegisterPlayerInputSerializer, RegisterPlayerOutputSerializer
 
 
 class PlayerConsumer(AsyncJsonWebsocketConsumer):
@@ -31,3 +35,52 @@ class PlayerConsumer(AsyncJsonWebsocketConsumer):
             'type': 'redirect',
             'url': url
         })
+
+
+class BotConsumer(AsyncJsonWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add('bot', self.channel_name)
+        await self.accept()
+
+        await self.send_json({'status': 'ok'})
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard('players', self.channel_name)
+
+    @extend_ws_schema(
+        request=RegisterPlayerInputSerializer,
+        responses={200: RegisterPlayerOutputSerializer},
+        type='send',
+        description='Регистрация игрока через WebSocket'
+    )
+    async def register_player(self, content):
+        telegram_id = content.get('telegram_id')
+        username = content.get('username', '')
+
+        if telegram_id is None:
+            await self.send_json({'status': 'error', 'message': 'telegram_id is required'})
+            return
+
+        player, created = await database_sync_to_async(Player.objects.get_or_create)(
+            telegram_id=telegram_id,
+            defaults={'username': username, 'prompt': None, 'answer': None, 'vote_count': None},
+        )
+
+        if not created:
+            player.username = username
+            player.joined_at = timezone.now()
+            await database_sync_to_async(player.save)()
+
+        channel_layer = get_channel_layer()
+        await channel_layer.group_send(
+            'players',
+            {
+                'type': 'player_joined',
+                'player': {
+                    'id': player.id,
+                    'username': player.username,
+                },
+            }
+        )
+
+        await self.send_json({'status': 'ok'})

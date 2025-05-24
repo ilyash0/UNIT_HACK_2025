@@ -30,7 +30,14 @@ CSRF_TRUSTED_ORIGINS = ["https://unit-hack-2025.onrender.com"]
 
 # Application definition
 
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
 INSTALLED_APPS = [
+    'drf_spectacular_websocket',
+    'drf_spectacular',
+    'drf_spectacular_sidecar',
     'channels',
     'daphne',
     'django.contrib.admin',
@@ -136,3 +143,15 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SPECTACULAR_SETTINGS = {
+    'DEFAULT_GENERATOR_CLASS': 'drf_spectacular_websocket.schemas.WsSchemaGenerator',
+    'SWAGGER_UI_DIST': 'SIDECAR',
+    'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
+    'REDOC_DIST': 'SIDECAR',
+    'SWAGGER_UI_SETTINGS': {
+        'connectSocket': True,
+        'socketMaxMessages': 8,
+        'socketMessagesInitialOpened': False,
+    },
+}

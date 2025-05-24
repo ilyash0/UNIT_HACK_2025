@@ -10,3 +10,5 @@ uvicorn~=0.33.0
 ruff~=0.11.10
 asgiref~=3.8.1
 whitenoise~=6.9.0
+drf-spectacular~=0.28.0
+djangorestframework~=3.16.0
