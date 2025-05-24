@@ -34,14 +34,7 @@ class BotConsumer(AsyncJsonWebsocketConsumer):
         if not text_data:
             return
 
-        try:
-            content = loads(text_data)
-        except JSONDecodeError:
-            await self.send_json({
-                'status': 'error',
-                'message': 'Invalid JSON format'
-            })
-            return
+        content = loads(text_data)
 
         await self.receive_json(content)
 
