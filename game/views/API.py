@@ -16,6 +16,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 
 from ..models import Player
+from ..serializers import PlayerCountSerializer
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -266,6 +267,8 @@ class PromptAPIView(View):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class PlayerCountAPIView(APIView):
+    serializer_class = PlayerCountSerializer
+
     async def get(self, request, *args, **kwargs):
         count = await Player.objects.acount()
         prompt_index = await sync_to_async(cache.get)("prompt_index", 0)
